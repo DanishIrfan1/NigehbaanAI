@@ -1,0 +1,21 @@
+# ── Backend ──────────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+pydantic-settings==2.2.1
+python-dotenv==1.0.1
+httpx==0.27.0
+
+# ── Google Antigravity / ADK ──────────────────────────────────────────────────
+google-adk==0.1.0           # Antigravity Agent Development Kit (Hackathon SDK)
+google-generativeai==0.5.4  # Gemini models used by agents
+
+# ── Agents / Tools ───────────────────────────────────────────────────────────
+aiohttp==3.9.5
+geopy==2.4.1
+folium==0.16.0              # map visualisation (optional server-side)
+
+# ── Dev / Testing ────────────────────────────────────────────────────────────
+pytest==8.2.0
+pytest-asyncio==0.23.6
+httpx                       # shared with FastAPI test client
