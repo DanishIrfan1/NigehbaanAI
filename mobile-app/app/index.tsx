@@ -21,6 +21,7 @@ export default function Dashboard() {
   
   // Input states
   const [textSignal, setTextSignal] = useState('G-10 mein pani bhar gaya hai, gaariyan phans gayi hain');
+  const [useSocialMedia, setUseSocialMedia] = useState(true);
   const [useWeather, setUseWeather] = useState(true);
   const [useTraffic, setUseTraffic] = useState(true);
   
@@ -43,7 +44,7 @@ export default function Dashboard() {
     setOutcome(null);
 
     try {
-      await triggerAnalyze({ text: textSignal, weather: useWeather, traffic: useTraffic });
+      await triggerAnalyze({ text: textSignal, socialMedia: useSocialMedia, weather: useWeather, traffic: useTraffic });
       // Start polling
       const interval = setInterval(fetchDashboardData, 2000);
       setPollInterval(interval);
@@ -130,25 +131,31 @@ export default function Dashboard() {
               style={styles.input}
             />
             <View style={styles.switchRow}>
-              <Text>Cross-reference Weather</Text>
+              <Text>Social Media Signal</Text>
+              <Switch value={useSocialMedia} onValueChange={setUseSocialMedia} color={theme.colors.primary} />
+            </View>
+            <View style={styles.switchRow}>
+              <Text>Weather Alert</Text>
               <Switch value={useWeather} onValueChange={setUseWeather} color={theme.colors.primary} />
             </View>
             <View style={styles.switchRow}>
-              <Text>Cross-reference Traffic</Text>
+              <Text>Traffic Spike</Text>
               <Switch value={useTraffic} onValueChange={setUseTraffic} color={theme.colors.primary} />
             </View>
           </Card.Content>
-          <Card.Actions>
+          <View style={styles.buttonContainer}>
             <Button 
               mode="contained" 
               onPress={startAnalysis} 
               loading={isAnalyzing}
               disabled={isAnalyzing}
               icon="brain"
+              buttonColor="#ff5252"
+              style={styles.fullWidthButton}
             >
-              Analyze Threat
+              Analyze Crisis
             </Button>
-          </Card.Actions>
+          </View>
         </Card>
 
         {/* Dynamic Dashboard - shown once processing starts or data exists */}
@@ -258,6 +265,8 @@ const styles = StyleSheet.create({
   cardTitle: { marginBottom: 16, fontWeight: 'bold' },
   input: { marginBottom: 16 },
   switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+  buttonContainer: { padding: 16, paddingTop: 0 },
+  fullWidthButton: { width: '100%', borderRadius: 8, paddingVertical: 6 },
   dashboardArea: { marginTop: 16 },
   sectionTitle: { fontWeight: 'bold', marginBottom: 12 },
   statusHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
