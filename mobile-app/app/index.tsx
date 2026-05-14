@@ -15,9 +15,12 @@ import {
 import { triggerAnalyze, getCrisisStatus, getAgentsTrace, getActions, getOutcome } from '../src/api/client';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
 
 export default function Dashboard() {
   const theme = useTheme();
+  const router = useRouter();
   
   // Input states
   const [textSignal, setTextSignal] = useState('G-10 mein pani bhar gaya hai, gaariyan phans gayi hain');
@@ -166,11 +169,12 @@ export default function Dashboard() {
 
             {/* Crisis Status */}
             {crisisStatus && (
-              <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: crisisStatus.severity === 'HIGH' ? '#ff5252' : theme.colors.primary }]} mode="elevated">
-                <Card.Content>
-                  <View style={styles.statusHeader}>
-                    <View>
-                      <Text variant="titleLarge">{crisisStatus.type || 'Detecting...'}</Text>
+              <TouchableOpacity onPress={() => router.push('/crisis')} activeOpacity={0.8}>
+                <Card style={[styles.card, { borderLeftWidth: 4, borderLeftColor: crisisStatus.severity === 'HIGH' ? '#ff5252' : theme.colors.primary }]} mode="elevated">
+                  <Card.Content>
+                    <View style={styles.statusHeader}>
+                      <View>
+                        <Text variant="titleLarge">{crisisStatus.type || 'Detecting...'}</Text>
                       <Text variant="bodyMedium">{crisisStatus.location || 'Unknown Location'}</Text>
                     </View>
                     <Chip icon="alert" textStyle={{ fontWeight: 'bold' }}>
@@ -189,6 +193,7 @@ export default function Dashboard() {
                   )}
                 </Card.Content>
               </Card>
+            </TouchableOpacity>
             )}
 
             {/* Response Actions */}

@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     top: 60,
     left: 20,
     right: 20,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e1e1e',
     borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   topCardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#ffffff',
   },
   severityBadge: {
     backgroundColor: '#ff4444',
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   legendContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e1e1e',
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderRadius: 16,
@@ -303,10 +303,10 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#4a4a4a',
+    color: '#ffffff',
   },
   actionButton: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: '#f44336',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',

@@ -67,7 +67,7 @@ const CrisisScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#121212',
   },
   content: {
     padding: 16,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#ffffff',
     marginBottom: 16,
     marginTop: 8,
   },
@@ -100,32 +100,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   secondaryButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e1e1e',
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#333',
   },
   secondaryButtonText: {
-    color: '#333',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
   footerSection: {
     marginTop: 32,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1e1e1e',
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#333',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#444',
+    color: '#ffffff',
     marginBottom: 8,
   },
   timestampText: {
     fontSize: 14,
-    color: '#666',
+    color: '#aaaaaa',
   },
   signalRow: {
     flexDirection: 'row',
@@ -133,12 +133,12 @@ const styles = StyleSheet.create({
   },
   signalDot: {
     fontSize: 14,
-    color: '#888',
+    color: '#aaaaaa',
     marginRight: 8,
   },
   signalText: {
     fontSize: 14,
-    color: '#555',
+    color: '#dddddd',
     flex: 1,
   },
 });
