@@ -40,9 +40,16 @@ export default function ActionsScreen() {
             delayMs={4000}
             onDone={handleActionDone}
           />
+          <ActionCard
+            title="Hospital Alert"
+            description="Emergency beds prepared at PIMS"
+            icon="hospital-building"
+            delayMs={5500}
+            onDone={handleActionDone}
+          />
         </View>
 
-        {completedCount >= 3 && (
+        {completedCount >= 4 && (
           <Animated.View entering={FadeInUp.duration(600)} style={styles.footer}>
             <TouchableOpacity 
               style={styles.outcomeButton} 

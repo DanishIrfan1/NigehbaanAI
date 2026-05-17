@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [useSocialMedia, setUseSocialMedia] = useState(true);
   const [useWeather, setUseWeather] = useState(true);
   const [useTraffic, setUseTraffic] = useState(true);
+  const [useEmergencyCall, setUseEmergencyCall] = useState(false);
   
   // App state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -102,7 +103,7 @@ export default function Dashboard() {
     setOutcome(null);
 
     try {
-      await triggerAnalyze({ text: textSignal, socialMedia: useSocialMedia, weather: useWeather, traffic: useTraffic });
+      await triggerAnalyze({ text: textSignal, socialMedia: useSocialMedia, weather: useWeather, traffic: useTraffic, emergencyCall: useEmergencyCall });
       // Start polling
       const interval = setInterval(fetchDashboardData, 2000);
       setPollInterval(interval);
@@ -199,6 +200,10 @@ export default function Dashboard() {
             <View style={styles.switchRow}>
               <Text>Traffic Spike</Text>
               <Switch value={useTraffic} onValueChange={setUseTraffic} color={theme.colors.primary} />
+            </View>
+            <View style={styles.switchRow}>
+              <Text>📞 Emergency Call</Text>
+              <Switch value={useEmergencyCall} onValueChange={setUseEmergencyCall} color={theme.colors.primary} />
             </View>
           </Card.Content>
           <View style={styles.buttonContainer}>
