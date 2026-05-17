@@ -1,5 +1,8 @@
 """
-NigehbaanAI – Main Antigravity Orchestrator  [cite: 400]
+NigehbaanAI – Legacy Stub Orchestrator (DEPRECATED)
+
+**Do not use in production.** The API uses agents.adk_orchestrator instead.
+This module is retained for baseline_comparison.py only.
 
 Coordinates three specialist agents:
   1. Detector  – fuses signals and classifies the crisis
@@ -15,12 +18,10 @@ from __future__ import annotations
 import json
 import datetime
 import pathlib
-import sys
 
-# Ensure repo root is on the path when running directly
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+import agents.path_setup  # noqa: F401
 
-from backend.app.database.mock_store import upsert_incident
+from app.database.mock_store import upsert_incident
 from agents.tools.map_tool import simulate_rerouting
 from agents.tools.alert_tool import send_alert
 
@@ -93,8 +94,6 @@ def _run_planner(signal_id: str, detection: dict) -> dict:
     """
     Planner agent: selects response actions given resource constraints.
     """
-    from backend.app.database.mock_data import MOCK_RESOURCES
-
     crisis = detection["crisis_type"]
     severity = detection["severity"]
 
@@ -184,7 +183,7 @@ def process_signal(signal_id: str, payload: dict) -> None:
         _log_trace(signal_id, "orchestrator", "pipeline_complete", {"result": result})
         upsert_incident(signal_id, result)
 
-    except Exception as exc:  # noqa: BLE001
+    except (KeyError, TypeError, ValueError, OSError) as exc:
         error = {"status": "error", "signal_id": signal_id, "error": str(exc)}
         _log_trace(signal_id, "orchestrator", "pipeline_error", error)
         upsert_incident(signal_id, error)

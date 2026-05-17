@@ -5,17 +5,20 @@ Timeline: Day 2
 Priority: High
 
 Status
-- Not started
+- Backend and Agents: Completed
+- Frontend: Not started
 
 Objectives
 - Final polish, documentation, and submission artifacts.
 - Demo stability and trace readability.
 
 Backend and Agents
-- [ ] Run full demo scenarios and fix bugs.
-- [ ] Trace log polish (workplan, task_plan, final_outcome entries).
-- [ ] Baseline comparison script for agent vs stub results.
-- [ ] Latency and cost notes for the pipeline.
+- [x] Run full demo scenarios via scripts/run_demo_scenarios.py.
+- [x] Trace log polish (workplan, task_plan, final_outcome entries).
+- [x] Baseline comparison script: scripts/baseline_comparison.py.
+- [x] Latency and cost notes for the pipeline.
+- [x] Google ADK integration wrapper (agents/adk_pipeline.py).
+- [x] Full pipeline integration tests with mocked Gemini.
 
 Frontend
 - [ ] Final UI polish and SafeArea handling.
@@ -24,7 +27,7 @@ Frontend
 - [ ] Demo recording on device.
 
 Docs and Submission
-- [ ] README updates: architecture, schemas, ADK usage, limits.
+- [x] README updates: architecture, schemas, ADK usage, limits.
 - [ ] Submission checklist (repo, demos, traces, videos).
 
 Checkpoint

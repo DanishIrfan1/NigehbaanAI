@@ -1,0 +1,15 @@
+.venv/
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+mobile-app/node_modules/
+mobile-app/.expo/
+.git/
+.cursor/
+agents/traces/trace_log.jsonl
+*.egg-info/
+dist/
+build/
+.env

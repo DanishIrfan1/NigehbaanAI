@@ -71,3 +71,54 @@ async def verify_signal(signal_id: str, payload: VerifyPayload, background_tasks
         "status": "verifying",
         "message": "Field report received. Verification Agent processing in background.",
     }
+
+
+@router.post("/scenario/multi-crisis", status_code=202)
+async def run_multi_crisis_scenario(background_tasks: BackgroundTasks):
+    """
+    Queue two simultaneous crisis signals for multi-crisis demo:
+    G-10 flooding + F-8 heatwave.
+    """
+    import uuid
+    import time
+
+    from agents.adk_orchestrator import process_signal
+
+    flood_id = str(uuid.uuid4())
+    heat_id = str(uuid.uuid4())
+
+    flood_payload = {
+        "source": "multi_source",
+        "location": "G-10, Islamabad",
+        "description": "Streets flooded in G-10! Water entering homes. Need help NOW!",
+        "severity_hint": "high",
+        "enable_weather": True,
+        "enable_traffic": True,
+        "enable_social": True,
+        "enable_emergency_call": True,
+    }
+    heat_payload = {
+        "source": "multi_source",
+        "location": "F-8, Islamabad",
+        "description": "Elderly people collapsing from heat in F-8. Extreme temperatures.",
+        "severity_hint": "medium",
+        "enable_weather": True,
+        "enable_traffic": True,
+        "enable_social": True,
+        "enable_emergency_call": False,
+    }
+
+    background_tasks.add_task(process_signal, flood_id, flood_payload)
+
+    def _delayed_heat():
+        time.sleep(2)
+        process_signal(heat_id, heat_payload)
+
+    background_tasks.add_task(_delayed_heat)
+
+    return {
+        "status": "queued",
+        "flood_signal_id": flood_id,
+        "heat_signal_id": heat_id,
+        "message": "Multi-crisis scenario queued (G-10 flood + F-8 heatwave after 2s).",
+    }

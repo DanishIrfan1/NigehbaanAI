@@ -12,41 +12,11 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import google.generativeai as genai
+import agents.path_setup  # noqa: F401
+from app.database.mock_store import commit_resources, get_ledger_snapshot
 
-from agents.config import GOOGLE_API_KEY, MODEL_ID, DEFAULT_RESOURCES, log_trace
-
-# ── Configure Gemini ─────────────────────────────────────────────────────────
-genai.configure(api_key=GOOGLE_API_KEY)
-_model = genai.GenerativeModel(MODEL_ID)
-
-
-def _llm_call(prompt: str, agent_name: str, signal_id: str) -> str:
-    """Make a Gemini API call with error handling and trace logging."""
-    log_trace(signal_id, agent_name, "llm_call_start", {"prompt_length": len(prompt)})
-    try:
-        response = _model.generate_content(prompt)
-        text = response.text
-        log_trace(signal_id, agent_name, "llm_call_complete", {
-            "response_length": len(text),
-        })
-        return text
-    except Exception as e:
-        log_trace(signal_id, agent_name, "llm_call_error", {"error": str(e)})
-        raise
-
-
-def _parse_json_from_llm(text: str) -> dict:
-    """Extract JSON from LLM response (handles markdown code blocks)."""
-    cleaned = text.strip()
-    if cleaned.startswith("```json"):
-        cleaned = cleaned[7:]
-    elif cleaned.startswith("```"):
-        cleaned = cleaned[3:]
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3]
-    cleaned = cleaned.strip()
-    return json.loads(cleaned)
+from agents.config import DEFAULT_RESOURCES, log_trace
+from agents.llm_utils import llm_call, parse_json_from_llm
 
 
 def run_resource_planner(
@@ -121,8 +91,10 @@ Allocate emergency response resources for the detected crisis.
 }}
 ```"""
 
-    response = _llm_call(prompt, "resource_planner_agent", signal_id)
-    result = _parse_json_from_llm(response)
+    response = llm_call(prompt, "resource_planner_agent", signal_id)
+    result = parse_json_from_llm(response)
+
+    result = enforce_resource_caps(result)
 
     log_trace(signal_id, "resource_planner_agent", "plan_complete", {
         "priority": result.get("priority"),
@@ -132,3 +104,29 @@ Allocate emergency response resources for the detected crisis.
     })
 
     return result
+
+
+def enforce_resource_caps(plan: dict[str, Any]) -> dict[str, Any]:
+    """
+    Cap LLM resource commitments against DEFAULT_RESOURCES with 10% reserve.
+    Deducts from shared ledger via mock_store.commit_resources.
+    """
+    committed = dict(plan.get("total_resources_committed") or {})
+    capped: dict[str, int] = {}
+
+    for resource, total in DEFAULT_RESOURCES.items():
+        reserve = max(1, int(total * 0.10))
+        max_alloc = total - reserve
+        requested = int(committed.get(resource, 0))
+        capped[resource] = min(requested, max_alloc)
+
+    actual = commit_resources(capped)
+    remaining = get_ledger_snapshot()
+
+    plan["total_resources_committed"] = actual
+    plan["resources_remaining"] = remaining
+    plan["reserve_maintained_pct"] = 10
+    if sum(actual.values()) < sum(capped.values()):
+        plan["resource_cap_note"] = "Allocations capped to available pool and 10% reserve"
+
+    return plan
