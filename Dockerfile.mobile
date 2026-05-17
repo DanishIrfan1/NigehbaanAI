@@ -1,0 +1,11 @@
+FROM node:20-bookworm-slim
+
+WORKDIR /app
+
+COPY mobile-app/package.json mobile-app/package-lock.json ./
+RUN npm ci
+
+# Source bind-mounted at runtime; node_modules kept in named volume
+EXPOSE 8081 19000 19001
+
+CMD ["npx", "expo", "start", "--host", "lan"]

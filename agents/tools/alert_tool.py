@@ -9,6 +9,7 @@ Called by the Executor agent to dispatch tailored alerts to:
 
 from __future__ import annotations
 import datetime
+import uuid
 
 # Template library – each crisis type × channel has a message template
 ALERT_TEMPLATES: dict[str, dict[str, str]] = {
@@ -102,8 +103,11 @@ def send_alert(
         beds=beds,
     )
 
+    alert_id = f"alert-{uuid.uuid4().hex[:12]}"
+
     return {
         "status": "[SIMULATED] sent",
+        "alert_id": alert_id,
         "channel": channel,
         "location": location,
         "crisis_type": crisis_type,

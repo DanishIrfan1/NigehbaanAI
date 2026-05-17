@@ -5,7 +5,7 @@ Timeline: Day 1
 Priority: Critical
 
 Status
-- Backend and Agents: Completed
+- Backend and Agents: Completed (core pipeline); ADK framework integration deferred to Phase 4
 - Frontend (mock UI flow): In progress
 
 Objectives
@@ -21,6 +21,9 @@ Backend and Agents
 - [x] Orchestrator stage 1-2 (ingest -> detect) wired end to end.
 - [x] API endpoints for signal ingest and detection results.
 - [x] E2E test coverage for Phase 1 flow.
+- [x] Wire `enable_weather` / `enable_traffic` / `enable_social` / `enable_emergency_call` in `_ingest_signals`.
+- [x] Deprecate legacy orchestrator.py; production path is adk_orchestrator.py only.
+- [x] Align docs/README.md architecture diagram with ADK orchestrator.
 
 Frontend (Mock UI Flow)
 - [x] Expo + TypeScript app with expo-router, react-native-paper, maps, reanimated.

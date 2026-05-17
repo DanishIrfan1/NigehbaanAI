@@ -5,7 +5,7 @@ Timeline: Day 2
 Priority: High
 
 Status
-- Backend and Agents: Partial
+- Backend and Agents: Completed
 - Frontend: Not started
 
 Objectives
@@ -17,9 +17,13 @@ Backend and Agents
 - [x] Verification Agent for false alarm correction.
 - [x] Verification endpoint: POST /api/v1/verify/{signal_id}.
 - [x] Emergency call tool and ingestion as 4th signal source.
-- [ ] Degraded mode and fallback logic with explicit flags.
-- [ ] Ambulance reroute tool (simulate_ambulance_reroute) and planner usage.
-- [ ] Tests for false alarm and degraded mode paths.
+- [x] Fix `retract_alert` invocation + store `alert_id` from `send_alert` for retraction.
+- [x] Degraded mode module: agents/robustness/degraded.py with explicit flags.
+- [x] Respect `enable_*` flags: skipped source logs source_degraded trace.
+- [x] `simulate_ambulance_reroute` in map_tool.py and planner/executor wiring.
+- [x] Duplicate-incident detection in orchestrator.
+- [x] GET /api/v1/status/{id} exposes degraded_mode, warnings, verification.
+- [x] Tests: tests/test_phase3_robustness.py.
 
 Frontend
 - [ ] Field report input and correction UI on Crisis screen.
