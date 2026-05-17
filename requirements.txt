@@ -1,10 +1,10 @@
 # ── Backend ──────────────────────────────────────────────────────────────────
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
 pydantic==2.7.1
-pydantic-settings==2.2.1
+pydantic-settings>=2.5.2
 python-dotenv==1.0.1
-httpx==0.27.0
+httpx>=0.28.1
 
 # ── Google Antigravity / ADK ──────────────────────────────────────────────────
 google-adk==0.1.0           # Antigravity Agent Development Kit (Hackathon SDK)

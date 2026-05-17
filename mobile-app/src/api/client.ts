@@ -10,7 +10,7 @@ const api = axios.create({
   timeout: 10000,
 });
 
-export const triggerAnalyze = async (payload: { text: string; socialMedia?: boolean; weather: boolean; traffic: boolean }) => {
+export const triggerAnalyze = async (payload: { text: string; socialMedia?: boolean; weather: boolean; traffic: boolean; emergencyCall?: boolean }) => {
   const res = await api.post('/analyze', payload);
   return res.data;
 };
