@@ -93,8 +93,8 @@ const CrisisCard: React.FC<CrisisCardProps> = ({
 
       <View style={styles.impactsSection}>
         <Text style={styles.label}>Impact:</Text>
-        {impacts.map((impact, index) => (
-          <View key={index} style={styles.impactRow}>
+        {impacts.map((impact) => (
+          <View key={impact} style={styles.impactRow}>
             <Text style={styles.bulletPoint}>•</Text>
             <Text style={styles.impactText}>{impact}</Text>
           </View>

@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Card, ActivityIndicator, useTheme } from 'react-native-paper';
+import { Card, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
 export type ActionState = 'PENDING' | 'EXECUTING' | 'DONE';
 
-interface ActionCardProps {
+type ActionCardProps = Readonly<{
   title: string;
   description: string;
   icon: string;
   delayMs: number;
   onDone?: () => void;
-}
+}>;
 
 export default function ActionCard({ title, description, icon, delayMs, onDone }: ActionCardProps) {
-  const theme = useTheme();
   const [status, setStatus] = useState<ActionState>('PENDING');
 
   useEffect(() => {
@@ -50,13 +49,13 @@ export default function ActionCard({ title, description, icon, delayMs, onDone }
   return (
     <Animated.View entering={FadeInRight.delay(Math.min(delayMs, 800)).duration(400)}>
       <Card style={[styles.card, { borderColor: getStatusColor(), backgroundColor: '#1e1e1e' }]} mode="outlined">
-        <Card.Title
-          title={title}
-          subtitle={description}
-          titleStyle={{ color: '#ffffff', fontWeight: 'bold' }}
-          subtitleStyle={{ color: '#aaaaaa' }}
-          left={(props) => <MaterialCommunityIcons name={icon as any} size={28} color="#f44336" />}
-          right={(props) => (
+        <Card.Content>
+          <View style={styles.headerRow}>
+            <MaterialCommunityIcons name={icon as any} size={28} color="#f44336" />
+            <View style={styles.textColumn}>
+              <Text style={styles.title}>{title}</Text>
+              <Text style={styles.subtitle}>{description}</Text>
+            </View>
             <View style={styles.statusBadge}>
               {status === 'EXECUTING' ? (
                 <ActivityIndicator animating color="#ff9800" size={16} style={{ marginRight: 6 }} />
@@ -65,8 +64,8 @@ export default function ActionCard({ title, description, icon, delayMs, onDone }
               )}
               <Text style={[styles.statusText, { color: getStatusColor() }]}>{status}</Text>
             </View>
-          )}
-        />
+          </View>
+        </Card.Content>
       </Card>
     </Animated.View>
   );
@@ -77,6 +76,24 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderWidth: 1,
     borderRadius: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textColumn: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  title: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  subtitle: {
+    color: '#aaaaaa',
+    marginTop: 2,
+    fontSize: 13,
   },
   statusBadge: {
     flexDirection: 'row',

@@ -72,3 +72,11 @@ Do not build a simple summarizer, listing app, static dashboard, fixed-rule game
 Judges will look for evidence that the system observes, reasons, decides, acts, evaluates, and adapts.
 Use realistic mock data if real APIs are unavailable. Clearly label synthetic data and avoid personal or sensitive information.
 Prioritize a reliable end-to-end workflow over an overly broad but shallow implementation.
+
+
+
+https://drive.google.com/file/d/13F1WWQJBkNViF64457ZMiZ_zIZayMIER/view
+https://trygcp.dev/claim/ai-seekho-hackathon-code-3
+
+https://chat.whatsapp.com/ENOU2PKhejTJSRm1Lsq0Kt
+https://discord.com/invite/pdJ64hPkbt

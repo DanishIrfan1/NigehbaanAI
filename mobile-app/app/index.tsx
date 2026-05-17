@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, StyleSheet, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import {
   Text,
   TextInput,
@@ -9,14 +9,63 @@ import {
   useTheme,
   ActivityIndicator,
   Divider,
-  List,
   Chip
 } from 'react-native-paper';
 import { triggerAnalyze, getCrisisStatus, getAgentsTrace, getActions, getOutcome } from '../src/api/client';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 30000;
+
+const applySettledValue = <T,>(
+  result: PromiseSettledResult<T>,
+  onValue: (value: T) => void
+) => {
+  if (result.status === 'fulfilled' && result.value) {
+    onValue(result.value);
+  }
+};
+
+const areActionsDone = (actions: any[]) =>
+  actions.length > 0 && actions.every((action) => action.status === 'DONE');
+
+const getActionKey = (action: any) =>
+  action.id ?? action.step ?? action.action ?? action.title ?? action.type ?? JSON.stringify(action);
+
+const getTraceKey = (trace: any) =>
+  trace.id ?? trace.ts ?? trace.time ?? JSON.stringify(trace);
+
+const ActionSummaryCard = ({ action, accentColor }: { action: any; accentColor: string }) => {
+  const status = action.status ?? 'PENDING';
+  const statusColor = status === 'DONE' ? '#4caf50' : accentColor;
+  const statusIcon = status === 'DONE' ? 'check-circle' : 'clock-fast';
+  const title = action.title ?? action.action ?? 'Action';
+  const subtitle = action.description ?? action.type ?? '';
+
+  return (
+    <Card style={[styles.card, { marginVertical: 4 }]} mode="contained">
+      <Card.Content>
+        <View style={styles.actionHeader}>
+          <MaterialCommunityIcons name={statusIcon} size={24} color={statusColor} />
+          <View style={styles.actionText}>
+            <Text variant="titleSmall">{title}</Text>
+            {!!subtitle && <Text variant="bodySmall">{subtitle}</Text>}
+          </View>
+          <Chip style={styles.actionChip} textStyle={{ color: statusColor }}>
+            {status}
+          </Chip>
+        </View>
+        {action.result && (
+          <Text variant="bodySmall" style={{ color: '#4caf50', marginTop: 6 }}>
+            {action.result}
+          </Text>
+        )}
+      </Card.Content>
+    </Card>
+  );
+};
 
 export default function Dashboard() {
   const theme = useTheme();
@@ -37,6 +86,12 @@ export default function Dashboard() {
   const [agentTraces, setAgentTraces] = useState<any[]>([]);
   const [actions, setActions] = useState<any[]>([]);
   const [outcome, setOutcome] = useState<any>(null);
+
+  const stopPolling = (interval: NodeJS.Timeout | null) => {
+    if (interval) clearInterval(interval);
+    setPollInterval(null);
+    setIsAnalyzing(false);
+  };
 
   const startAnalysis = async () => {
     setIsAnalyzing(true);

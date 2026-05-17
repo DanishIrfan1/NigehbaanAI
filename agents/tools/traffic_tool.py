@@ -90,7 +90,7 @@ def fetch_traffic(location: str) -> dict:
         "source_type": "official_sensor",
         "credibility": 0.90,
         "location": location,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "data_quality": "real_time",
         **data,
     }

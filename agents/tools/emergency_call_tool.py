@@ -102,7 +102,7 @@ def fetch_emergency_call(location: str) -> dict:
             "source_type": "emergency_hotline",
             "credibility": 0.98,  # Highest credibility — direct human report
             "location": location,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
             "data_quality": "direct_report",
             "has_call": True,
             **call_data,
@@ -113,7 +113,7 @@ def fetch_emergency_call(location: str) -> dict:
             "source_type": "emergency_hotline",
             "credibility": 0.98,
             "location": location,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
             "data_quality": "no_data",
             "has_call": False,
             "call_id": None,
