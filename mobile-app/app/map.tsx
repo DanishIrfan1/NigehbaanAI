@@ -8,21 +8,21 @@ const { width, height } = Dimensions.get('window');
 
 // Coordinates
 const ISLAMABAD_CENTER = { latitude: 33.6844, longitude: 73.0479 };
-const CRISIS_LOCATION = { latitude: 33.6730, longitude: 73.0039 }; // G-10
+const CRISIS_LOCATION = { latitude: 33.673, longitude: 73.0039 }; // G-10
 
 const BLOCKED_ROUTE = [
-  { latitude: 33.6650, longitude: 72.9900 },
-  { latitude: 33.6700, longitude: 72.9980 },
+  { latitude: 33.665, longitude: 72.99 },
+  { latitude: 33.67, longitude: 72.998 },
   CRISIS_LOCATION,
-  { latitude: 33.6800, longitude: 73.0150 }
+  { latitude: 33.68, longitude: 73.015 }
 ];
 
 const ALTERNATE_ROUTE_KEYPOINTS = [
-  { latitude: 33.6650, longitude: 72.9900 },
-  { latitude: 33.6600, longitude: 73.0000 },
-  { latitude: 33.6620, longitude: 73.0100 },
-  { latitude: 33.6700, longitude: 73.0200 },
-  { latitude: 33.6800, longitude: 73.0150 }
+  { latitude: 33.665, longitude: 72.99 },
+  { latitude: 33.66, longitude: 73 },
+  { latitude: 33.662, longitude: 73.01 },
+  { latitude: 33.67, longitude: 73.02 },
+  { latitude: 33.68, longitude: 73.015 }
 ];
 
 const interpolatePoints = (p1: any, p2: any, steps: number) => {
@@ -102,11 +102,21 @@ export default function MapScreen() {
   
   // Sanitize arrays to prevent null object reference crashes in AIRMapPolyline
   const safeAlternateRoute = currentAlternateRoute.filter(
-    (c) => c && typeof c.latitude === 'number' && typeof c.longitude === 'number' && !isNaN(c.latitude) && !isNaN(c.longitude)
+    (c) =>
+      c &&
+      typeof c.latitude === 'number' &&
+      typeof c.longitude === 'number' &&
+      !Number.isNaN(c.latitude) &&
+      !Number.isNaN(c.longitude)
   );
   
   const safeBlockedRoute = BLOCKED_ROUTE.filter(
-    (c) => c && typeof c.latitude === 'number' && typeof c.longitude === 'number' && !isNaN(c.latitude) && !isNaN(c.longitude)
+    (c) =>
+      c &&
+      typeof c.latitude === 'number' &&
+      typeof c.longitude === 'number' &&
+      !Number.isNaN(c.latitude) &&
+      !Number.isNaN(c.longitude)
   );
 
   return (

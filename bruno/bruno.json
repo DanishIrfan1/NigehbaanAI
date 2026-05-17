@@ -1,0 +1,9 @@
+{
+  "name": "NigehbaanAI",
+  "version": "1.0.0",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
