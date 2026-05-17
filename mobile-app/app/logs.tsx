@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 
-type AgentType = 'Detector' | 'Analyzer' | 'Planner' | 'Executor';
+type AgentType = 'Detector' | 'Analyzer' | 'Planner' | 'Executor' | 'Verifier';
 
 interface LogEntry {
   id: string;
@@ -21,6 +21,8 @@ const ALL_LOGS: LogEntry[] = [
   { id: '6', timestamp: '14:02:17', agent: 'Planner', message: 'Drafting public safety alerts for G-10 residents.' },
   { id: '7', timestamp: '14:02:19', agent: 'Executor', message: 'Dispatching emergency response units to Sector G-10.' },
   { id: '8', timestamp: '14:02:20', agent: 'Executor', message: 'Alerts successfully broadcasted to nearby users.' },
+  { id: '9', timestamp: '14:02:22', agent: 'Verifier', message: 'Cross-checking executed actions against plan objectives.' },
+  { id: '10', timestamp: '14:02:24', agent: 'Verifier', message: 'All actions verified. Crisis response confirmed effective.' },
 ];
 
 const LiveIndicator = () => {
@@ -51,6 +53,7 @@ const AgentLogItem = ({ item }: { item: LogEntry }) => {
       case 'Analyzer': return '#ffeb3b'; // Yellow
       case 'Planner': return '#ffb74d'; // Orange
       case 'Executor': return '#81c784'; // Green
+      case 'Verifier': return '#ff5252'; // Red
       default: return '#ffffff';
     }
   };

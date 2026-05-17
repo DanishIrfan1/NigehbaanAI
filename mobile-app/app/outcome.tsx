@@ -81,17 +81,25 @@ export default function OutcomeScreen() {
             afterSuffix=" min" 
             delay={300} 
           />
-          <StatCard 
-            label="Citizens Alerted" 
-            beforeStr="0" 
-            afterNum={4200} 
-            delay={500} 
+          <StatCard
+            label="Citizens Alerted"
+            beforeStr="0"
+            afterNum={4200}
+            delay={500}
           />
-          <StatCard 
-            label="Crisis Status" 
-            beforeStr="ACTIVE" 
-            afterStrOverride="MANAGED" 
-            delay={700} 
+          <StatCard
+            label="Ambulance ETA"
+            beforeStr="25 min"
+            afterNum={12}
+            afterSuffix=" min"
+            changeStr="-13 min"
+            delay={600}
+          />
+          <StatCard
+            label="Crisis Status"
+            beforeStr="ACTIVE"
+            afterStrOverride="MANAGED"
+            delay={800}
           />
         </View>
 
