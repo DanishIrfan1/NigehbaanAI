@@ -11,7 +11,7 @@ from app.api import signal, status
 from app.core.config import settings
 
 app = FastAPI(
-    title="NigehbaanAI – CIRO Backend",
+    title=settings.APP_NAME,
     description="Crisis Intelligence & Response Orchestrator API",
     version="0.2.0",
 )
@@ -46,5 +46,7 @@ async def list_endpoints():
             "GET /api/v1/actions/{signal_id}": "Executed response actions",
             "GET /api/v1/outcome/{signal_id}": "Before/after impact assessment",
             "GET /api/v1/incidents": "List all tracked incidents",
+            "POST /api/v1/verify/{signal_id}": "Submit field report for verification / false alarm",
+            "POST /api/v1/scenario/multi-crisis": "Queue G-10 flood + F-8 heatwave demo signals",
         }
     }

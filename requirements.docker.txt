@@ -1,0 +1,22 @@
+# Docker image dependencies (google-adk omitted — pip conflict with fastapi 0.111)
+# Pipeline runs via google-generativeai; set USE_ADK=true only with local venv + google-adk
+
+# Backend
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+pydantic-settings==2.2.1
+python-dotenv==1.0.1
+httpx==0.27.0
+
+# Gemini (agents)
+google-generativeai==0.5.4
+
+# Agents / tools
+aiohttp==3.9.5
+geopy==2.4.1
+folium==0.16.0
+
+# Dev / testing (run tests inside container)
+pytest==8.2.0
+pytest-asyncio==0.23.6

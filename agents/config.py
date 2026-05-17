@@ -86,3 +86,35 @@ DEFAULT_RESOURCES = {
     "shelters": 6,
     "field_teams": 10,
 }
+
+# Pipeline telemetry (reset per run in orchestrator)
+_pipeline_stats: dict[str, int] = {"llm_calls": 0, "tool_calls": 0}
+
+
+def reset_pipeline_stats() -> None:
+    global _pipeline_stats
+    _pipeline_stats = {"llm_calls": 0, "tool_calls": 0}
+
+
+def record_llm_call() -> None:
+    _pipeline_stats["llm_calls"] += 1
+
+
+def record_tool_call() -> None:
+    _pipeline_stats["tool_calls"] += 1
+
+
+def get_pipeline_stats() -> dict[str, int]:
+    return dict(_pipeline_stats)
+
+
+def log_workplan(signal_id: str, workplan: str) -> dict:
+    return log_trace(signal_id, "orchestrator", "workplan", {"workplan": workplan})
+
+
+def log_task_plan(signal_id: str, stage: str, tasks: list[str]) -> dict:
+    return log_trace(signal_id, "orchestrator", "task_plan", {"stage": stage, "tasks": tasks})
+
+
+def log_final_outcome(signal_id: str, outcome: dict) -> dict:
+    return log_trace(signal_id, "orchestrator", "final_outcome", outcome)
