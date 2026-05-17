@@ -143,12 +143,10 @@ Sensor Data: Water level normal
 
 | Phase File | Team | When |
 |-----------|------|------|
-| [phase1_backend_agents.md](./phases/phase1_backend_agents.md) | Danish + Umer | Day 1, First Half |
-| [phase2_planning_execution.md](./phases/phase2_planning_execution.md) | Danish + Umer | Day 1, Second Half |
-| [phase3_robustness.md](./phases/phase3_robustness.md) | Danish + Umer | Day 2, First Half |
-| [phase4_polish_docs.md](./phases/phase4_polish_docs.md) | All | Day 2, Second Half |
-| [frontend_phase1.md](./phases/frontend_phase1.md) | Adeel + FE Dev | Day 1 |
-| [frontend_phase2.md](./phases/frontend_phase2.md) | Adeel + FE Dev | Day 2 |
+| [phase1.md](./phases/phase1.md) | Backend + Frontend | Day 1 |
+| [phase2.md](./phases/phase2.md) | Backend + Frontend | Day 1-2 |
+| [phase3.md](./phases/phase3.md) | Backend + Frontend | Day 2 |
+| [phase4.md](./phases/phase4.md) | All | Day 2 |
 
 ---
 

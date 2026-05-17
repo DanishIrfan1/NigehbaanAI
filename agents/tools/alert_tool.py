@@ -109,7 +109,7 @@ def send_alert(
         "crisis_type": crisis_type,
         "severity": severity,
         "message": message,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
 
@@ -133,5 +133,5 @@ def retract_alert(
             f"After field verification, the incident has been reclassified as: {corrected_type}. "
             "All clear for the original crisis type."
         ),
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
     }

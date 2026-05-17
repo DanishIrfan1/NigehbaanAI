@@ -1,9 +1,9 @@
 const ALTERNATE_ROUTE_KEYPOINTS = [
-  { latitude: 33.6650, longitude: 72.9900 },
-  { latitude: 33.6600, longitude: 73.0000 },
-  { latitude: 33.6620, longitude: 73.0100 },
-  { latitude: 33.6700, longitude: 73.0200 },
-  { latitude: 33.6800, longitude: 73.0150 }
+  { latitude: 33.665, longitude: 72.99 },
+  { latitude: 33.66, longitude: 73 },
+  { latitude: 33.662, longitude: 73.01 },
+  { latitude: 33.67, longitude: 73.02 },
+  { latitude: 33.68, longitude: 73.015 }
 ];
 
 const interpolatePoints = (p1, p2, steps) => {

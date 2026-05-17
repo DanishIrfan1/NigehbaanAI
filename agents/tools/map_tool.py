@@ -55,6 +55,6 @@ def simulate_rerouting(location: str) -> dict:
     return {
         "status": "[SIMULATED] success",
         "location": location,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         **data,
     }

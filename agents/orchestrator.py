@@ -33,7 +33,7 @@ TRACE_FILE.parent.mkdir(exist_ok=True)
 def _log_trace(signal_id: str, agent: str, event: str, data: dict) -> None:
     """Append a structured trace entry (JSONL) for submission."""
     entry = {
-        "ts": datetime.datetime.utcnow().isoformat() + "Z",
+        "ts": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "signal_id": signal_id,
         "agent": agent,
         "event": event,

@@ -1,0 +1,17 @@
+meta {
+  name: Get Impact Outcome
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/outcome/{{signal_id}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

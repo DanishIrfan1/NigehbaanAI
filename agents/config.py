@@ -44,7 +44,7 @@ def log_trace(
     Also returns the entry dict so callers can use it.
     """
     entry = {
-        "ts": datetime.datetime.utcnow().isoformat() + "Z",
+        "ts": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "signal_id": signal_id,
         "agent": agent,
         "event": event,

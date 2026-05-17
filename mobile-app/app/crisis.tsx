@@ -53,8 +53,8 @@ const CrisisScreen = () => {
         <Text style={styles.timestampText}>Detected: {timestamp}</Text>
         
         <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Source Signals</Text>
-        {sourceSignals.map((signal, index) => (
-          <View key={index} style={styles.signalRow}>
+        {sourceSignals.map((signal) => (
+          <View key={signal} style={styles.signalRow}>
             <Text style={styles.signalDot}>•</Text>
             <Text style={styles.signalText}>{signal}</Text>
           </View>

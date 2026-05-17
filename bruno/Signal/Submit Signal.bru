@@ -1,0 +1,40 @@
+meta {
+  name: Submit Flood Signal
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/signal
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "source": "social_media",
+    "location": "G-10, Islamabad",
+    "description": "G-10 mein pani bhar gaya hai, gaariyan phans gayi hain. Bachon ko nikalna mushkil ho raha hai.",
+    "severity_hint": "high",
+    "enable_weather": true,
+    "enable_traffic": true,
+    "enable_social": true,
+    "enable_emergency_call": true
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 202) {
+    bru.setVar("signal_id", res.getBody().signal_id);
+  }
+}
+
+tests {
+  test("Status code is 202", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+  
+  test("Signal ID is returned", function() {
+    expect(res.getBody().signal_id).to.be.a('string');
+  });
+}

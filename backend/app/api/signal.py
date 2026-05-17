@@ -28,6 +28,10 @@ class SignalResponse(BaseModel):
     message: str
 
 
+class VerifyPayload(BaseModel):
+    field_report: str
+
+
 # ── Endpoint ─────────────────────────────────────────────────────────────────
 
 @router.post("/signal", response_model=SignalResponse, status_code=202)
@@ -50,3 +54,20 @@ async def ingest_signal(payload: SignalPayload, background_tasks: BackgroundTask
         status="queued",
         message="Signal received. ADK Orchestrator processing in background.",
     )
+
+
+@router.post("/verify/{signal_id}", status_code=202)
+async def verify_signal(signal_id: str, payload: VerifyPayload, background_tasks: BackgroundTasks):
+    """
+    Submit a field report to verify or correct an existing incident.
+    Triggers the Verification Agent pipeline in the background.
+    """
+    from agents.adk_orchestrator import verify_incident
+
+    background_tasks.add_task(verify_incident, signal_id, payload.field_report)
+
+    return {
+        "signal_id": signal_id,
+        "status": "verifying",
+        "message": "Field report received. Verification Agent processing in background.",
+    }

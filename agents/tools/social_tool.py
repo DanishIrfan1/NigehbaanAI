@@ -111,7 +111,7 @@ def fetch_social_posts(location: str) -> dict:
         "source_type": "citizen_reports",
         "credibility": round(avg_credibility, 2),
         "location": location,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "data_quality": "crowd_sourced",
         "post_count": total_posts,
         "mention_velocity_per_hour": total_velocity,

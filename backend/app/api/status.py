@@ -13,13 +13,16 @@ from app.database.mock_store import incident_store
 
 router = APIRouter()
 
+NOT_FOUND_DETAIL = "Signal ID not found."
+NOT_FOUND_RESPONSE = {404: {"description": NOT_FOUND_DETAIL}}
 
-@router.get("/status/{signal_id}")
+
+@router.get("/status/{signal_id}", responses=NOT_FOUND_RESPONSE)
 async def get_signal_status(signal_id: str):
     """Return the current processing state and result for a given signal_id."""
     record = incident_store.get(signal_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Signal ID not found.")
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
     return record
 
 
@@ -29,12 +32,12 @@ async def list_incidents():
     return {"incidents": list(incident_store.values())}
 
 
-@router.get("/crisis/{signal_id}")
+@router.get("/crisis/{signal_id}", responses=NOT_FOUND_RESPONSE)
 async def get_crisis_detection(signal_id: str):
     """Return the detection results: fusion, classification, severity."""
     record = incident_store.get(signal_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Signal ID not found.")
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
 
     detection = record.get("detection")
     if not detection:
@@ -53,7 +56,7 @@ async def get_crisis_detection(signal_id: str):
     }
 
 
-@router.get("/agents/trace/{signal_id}")
+@router.get("/agents/trace/{signal_id}", responses=NOT_FOUND_RESPONSE)
 async def get_agent_traces(signal_id: str):
     """Return all agent reasoning traces for a signal."""
     from agents.config import get_traces
@@ -62,7 +65,7 @@ async def get_agent_traces(signal_id: str):
     if not traces:
         record = incident_store.get(signal_id)
         if not record:
-            raise HTTPException(status_code=404, detail="Signal ID not found.")
+            raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
         return {
             "signal_id": signal_id,
             "trace_count": 0,
@@ -77,12 +80,12 @@ async def get_agent_traces(signal_id: str):
     }
 
 
-@router.get("/actions/{signal_id}")
+@router.get("/actions/{signal_id}", responses=NOT_FOUND_RESPONSE)
 async def get_actions(signal_id: str):
     """Return the executed response actions for a signal."""
     record = incident_store.get(signal_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Signal ID not found.")
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
 
     response = record.get("response", {})
     execution = response.get("execution", {})
@@ -106,12 +109,12 @@ async def get_actions(signal_id: str):
     }
 
 
-@router.get("/outcome/{signal_id}")
+@router.get("/outcome/{signal_id}", responses=NOT_FOUND_RESPONSE)
 async def get_outcome(signal_id: str):
     """Return the before/after impact assessment for a signal."""
     record = incident_store.get(signal_id)
     if not record:
-        raise HTTPException(status_code=404, detail="Signal ID not found.")
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
 
     impact = record.get("impact")
     response = record.get("response", {})
