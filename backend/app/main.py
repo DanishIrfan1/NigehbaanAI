@@ -13,7 +13,7 @@ from app.core.config import settings
 app = FastAPI(
     title="NigehbaanAI – CIRO Backend",
     description="Crisis Intelligence & Response Orchestrator API",
-    version="0.1.0",
+    version="0.2.0",
 )
 
 # ── CORS (open for hackathon; tighten for production) ────────────────────────
@@ -31,4 +31,20 @@ app.include_router(status.router, prefix="/api/v1", tags=["Status"])
 
 @app.get("/health", tags=["Health"])
 async def health_check():
-    return {"status": "ok", "service": "nigehbaan-ai"}
+    return {"status": "ok", "service": "nigehbaan-ai", "version": "0.2.0"}
+
+
+@app.get("/api/v1/endpoints", tags=["Health"])
+async def list_endpoints():
+    """List all available API endpoints for frontend integration."""
+    return {
+        "endpoints": {
+            "POST /api/v1/signal": "Submit a crisis signal for analysis",
+            "GET /api/v1/status/{signal_id}": "Full status of a processed signal",
+            "GET /api/v1/crisis/{signal_id}": "Detection results (classification + severity)",
+            "GET /api/v1/agents/trace/{signal_id}": "Agent reasoning trace logs",
+            "GET /api/v1/actions/{signal_id}": "Executed response actions",
+            "GET /api/v1/outcome/{signal_id}": "Before/after impact assessment",
+            "GET /api/v1/incidents": "List all tracked incidents",
+        }
+    }
