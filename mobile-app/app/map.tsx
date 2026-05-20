@@ -52,6 +52,7 @@ export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
   const [routeIndex, setRouteIndex] = useState(0);
+  const [ambulanceIndex, setAmbulanceIndex] = useState(0);
   
   // Pulsing animation for Marker
   const scale = useSharedValue(1);
@@ -88,9 +89,21 @@ export default function MapScreen() {
           return prev;
         }
       });
-    }, 100); 
-    
-    return () => clearInterval(intervalId);
+    }, 100);
+
+    // 4. Animate ambulance along alternate route
+    const ambulanceId = setInterval(() => {
+      setAmbulanceIndex(prev => {
+        if (prev < DENSE_ALTERNATE_ROUTE.length - 1) return prev + 1;
+        clearInterval(ambulanceId);
+        return prev;
+      });
+    }, 300);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(ambulanceId);
+    };
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -98,6 +111,7 @@ export default function MapScreen() {
     opacity: opacity.value,
   }));
 
+  const ambulanceCoord = DENSE_ALTERNATE_ROUTE[ambulanceIndex] ?? DENSE_ALTERNATE_ROUTE[0];
   const currentAlternateRoute = DENSE_ALTERNATE_ROUTE.slice(0, routeIndex);
   
   // Sanitize arrays to prevent null object reference crashes in AIRMapPolyline
@@ -152,6 +166,11 @@ export default function MapScreen() {
           />
         )}
 
+        {/* Ambulance Marker */}
+        <Marker coordinate={ambulanceCoord} anchor={{ x: 0.5, y: 0.5 }}>
+          <Text style={{ fontSize: 24 }}>🚑</Text>
+        </Marker>
+
         {/* Crisis Marker */}
         <Marker coordinate={CRISIS_LOCATION} anchor={{ x: 0.5, y: 0.5 }}>
           <View style={styles.markerContainer}>
@@ -188,6 +207,10 @@ export default function MapScreen() {
           <View style={styles.legendItem}>
             <Text style={styles.legendIcon}>📍</Text>
             <Text style={styles.legendText}>Crisis Zone</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <Text style={styles.legendIcon}>🚑</Text>
+            <Text style={styles.legendText}>Ambulance</Text>
           </View>
         </View>
         
