@@ -6,7 +6,7 @@ Priority: Critical
 
 Status
 - Backend and Agents: Completed (functional); challenge-hardening in Phase 3–4
-- Frontend Integration: Not started
+- Frontend Integration: Completed (mobile-app wired to /api/v1)
 
 Objectives
 - Generate resource plans and execute actions with measurable impact.
@@ -29,11 +29,11 @@ Backend and Agents
 - [x] Add POST /verify to GET /api/v1/endpoints catalog.
 
 Frontend Integration
-- [ ] Update API base to /api/v1 and use signal_id-driven flow.
-- [ ] Replace mock data in Crisis, Logs, Actions, Outcome with live calls.
-- [ ] Poll /status or /crisis until detection is ready.
-- [ ] Add loading skeletons, error states, and retry handling.
-- [ ] Display plan rationale and multi-crisis tradeoffs (optional).
+- [x] Update API base to /api/v1 and use signal_id-driven flow.
+- [x] Replace mock data in Crisis, Logs, Actions, Outcome with live calls.
+- [x] Poll /status or /crisis until detection is ready.
+- [x] Add loading skeletons, error states, and retry handling.
+- [x] Display plan rationale and multi-crisis tradeoffs (optional).
 - [ ] Validate the full flow on device with backend running.
 
 APIs available after Phase 2

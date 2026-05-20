@@ -6,7 +6,7 @@ Priority: Critical
 
 Status
 - Backend and Agents: Completed (core pipeline); ADK framework integration deferred to Phase 4
-- Frontend (mock UI flow): In progress
+- Frontend (mock UI flow): Completed; live API integration in Phase 2
 
 Objectives
 - Detection pipeline with trace logging and stable APIs.
@@ -29,12 +29,12 @@ Frontend (Mock UI Flow)
 - [x] Expo + TypeScript app with expo-router, react-native-paper, maps, reanimated.
 - [x] App shell with tab navigation and dark theme.
 - [x] Home/Dashboard input with social, weather, traffic toggles.
-- [ ] Emergency call toggle on Home/Dashboard.
+- [x] Emergency call toggle on Home/Dashboard.
 - [x] Analyze button with loading state.
 - [x] Crisis screen UI with CrisisCard and mock data.
 - [x] Agent log screen with streaming effect and LIVE indicator.
 - [x] Map screen with crisis marker, blocked route, animated alternate route.
-- [ ] Ambulance marker animation on map.
+- [x] Ambulance marker animation on map.
 - [x] Actions screen with ActionCard and auto transitions.
 - [x] Outcome screen with stat cards and managed banner.
 - [x] Mock data provider in src/services/mock.ts.

@@ -16,87 +16,14 @@ from dotenv import load_dotenv
 load_dotenv(_REPO_ROOT / ".env")
 
 
-MOCK_FUSION = {
-    "fused_summary": "Heavy rain and flooding reports in G-10 with traffic congestion.",
-    "overall_urgency": "high",
-    "credibility_scores": {"weather": 0.95, "traffic": 0.9, "social": 0.6},
-    "contradictions": [{"sources": ["social"], "detail": "water main vs flood"}],
-    "recommended_action": "Deploy rescue teams",
-}
-
-MOCK_CLASSIFICATION = {
-    "crisis_type": "urban_flooding",
-    "location": "G-10, Islamabad",
-    "confidence": 0.92,
-    "alternative_hypothesis": "infrastructure_failure",
-    "geolocation_confidence": 0.88,
-    "requires_field_verification": False,
-}
-
-MOCK_SEVERITY = {
-    "severity": "high",
-    "affected_radius_km": 2.5,
-    "affected_population": 15000,
-    "expected_duration_hrs": 6,
-    "peak_impact_time": "2026-05-18T14:00:00Z",
-    "spread_risk": "medium",
-    "uncertainty_range": "±20%",
-}
-
-MOCK_PLAN = {
-    "priority": "P1",
-    "action_plan": [
-        {
-            "step": 1,
-            "action": "traffic_rerouting",
-            "description": "Reroute traffic away from G-10",
-            "resources_needed": {"police_units": 2},
-            "side_effects": ["evacuation congestion"],
-            "fallback": "manual traffic control",
-        },
-        {
-            "step": 2,
-            "action": "ambulance_reroute",
-            "description": "Reroute ambulances via alternate path",
-            "resources_needed": {"ambulances": 2},
-            "side_effects": [],
-            "fallback": "air ambulance",
-        },
-        {
-            "step": 3,
-            "action": "public_alert",
-            "description": "Issue public flood alert",
-            "resources_needed": {},
-            "side_effects": ["panic"],
-            "fallback": "staged alerting",
-        },
-    ],
-    "total_resources_committed": {"ambulances": 2, "police_units": 2, "rescue_teams": 3},
-    "rationale": "High severity flooding requires immediate response.",
-    "multi_crisis_tradeoffs": "",
-    "ambulance_routing_note": "Use I-8 bypass",
-}
-
-MOCK_NOTIFICATIONS = {
-    "notifications": {
-        "public": "Stay indoors",
-        "emergency_services": "Dispatch to G-10",
-        "hospital": "Prepare beds",
-        "utility": "Check water main",
-        "transport": "Reroute buses",
-        "media": "Official statement",
-    },
-    "notification_count": 6,
-}
-
-MOCK_VERIFICATION = {
-    "verification_status": "corrected",
-    "is_retraction_needed": True,
-    "corrected_crisis_type": "infrastructure_failure",
-    "correction_reason": "Field verification confirms water main burst only",
-    "confidence_after_verification": 0.91,
-}
-
+from agents.mock_llm_payloads import (
+    MOCK_CLASSIFICATION,
+    MOCK_FUSION,
+    MOCK_NOTIFICATIONS,
+    MOCK_PLAN,
+    MOCK_SEVERITY,
+    MOCK_VERIFICATION,
+)
 
 @pytest.fixture(autouse=True)
 def reset_stores():

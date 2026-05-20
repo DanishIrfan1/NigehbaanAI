@@ -56,10 +56,44 @@ if port_in_use "$BACKEND_HOST_PORT"; then
 fi
 
 export BACKEND_HOST_PORT
-export EXPO_PUBLIC_API_URL="${EXPO_PUBLIC_API_URL:-http://localhost:${BACKEND_HOST_PORT}}"
+
+# Detect LAN IP for Expo Go on physical devices (phones cannot use localhost).
+detect_lan_ip() {
+  if command -v hostname &>/dev/null; then
+    hostname -I 2>/dev/null | awk '{print $1}'
+    return
+  fi
+  ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}'
+}
+
+LAN_IP="${LAN_IP:-$(detect_lan_ip)}"
+LAN_IP="${LAN_IP:-}"
+
+if [[ -z "${REACT_NATIVE_PACKAGER_HOSTNAME:-}" && -n "$LAN_IP" ]]; then
+  export REACT_NATIVE_PACKAGER_HOSTNAME="$LAN_IP"
+fi
+
+if [[ -z "${EXPO_PUBLIC_API_URL:-}" ]]; then
+  if [[ -n "$LAN_IP" ]]; then
+    export EXPO_PUBLIC_API_URL="http://${LAN_IP}:${BACKEND_HOST_PORT}"
+  else
+    export EXPO_PUBLIC_API_URL="http://localhost:${BACKEND_HOST_PORT}"
+  fi
+fi
 
 echo "API:  http://localhost:${BACKEND_HOST_PORT}/health"
-echo "Metro: http://localhost:8081"
+if [[ -n "$LAN_IP" ]]; then
+  echo "API (phone/LAN): http://${LAN_IP}:${BACKEND_HOST_PORT}/health"
+fi
+echo "Metro (browser on this PC): http://localhost:8081"
+if [[ -n "${REACT_NATIVE_PACKAGER_HOSTNAME:-}" ]]; then
+  echo "Expo Go (phone): scan QR — packager host ${REACT_NATIVE_PACKAGER_HOSTNAME}"
+  echo "  Or open in Expo Go: exp://${REACT_NATIVE_PACKAGER_HOSTNAME}:8081"
+fi
+echo ""
+echo "Phone tip: never use localhost — use LAN IP above. Set in .env to persist:"
+echo "  REACT_NATIVE_PACKAGER_HOSTNAME=${REACT_NATIVE_PACKAGER_HOSTNAME:-$LAN_IP}"
+echo "  EXPO_PUBLIC_API_URL=${EXPO_PUBLIC_API_URL}"
 echo ""
 
 exec "${COMPOSE[@]}" up --build "$@"

@@ -6,7 +6,7 @@ Priority: High
 
 Status
 - Backend and Agents: Completed
-- Frontend: Not started
+- Frontend: Completed (mobile-app)
 
 Objectives
 - Handle false alarms and corrections safely.
@@ -26,10 +26,10 @@ Backend and Agents
 - [x] Tests: tests/test_phase3_robustness.py.
 
 Frontend
-- [ ] Field report input and correction UI on Crisis screen.
-- [ ] Degraded mode banner when backend flags warnings.
-- [ ] Emergency call screen or visual component.
-- [ ] Ambulance reroute visualization on map.
+- [x] Field report input and correction UI on Crisis screen.
+- [x] Degraded mode banner when backend flags warnings.
+- [x] Emergency call screen or visual component.
+- [x] Ambulance reroute visualization on map.
 
 Checkpoint
 - Demo: false alarm correction OR degraded mode in a single run, with traces.

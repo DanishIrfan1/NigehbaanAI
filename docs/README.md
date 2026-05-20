@@ -35,7 +35,7 @@ nigehbaan-ai/
 |-----------|------|
 | `adk_orchestrator.py` | Sequential multi-agent pipeline with JSONL traces |
 | `adk_pipeline.py` | google-adk SDK wrapper (`USE_ADK=true`) |
-| Gemini 2.0 Flash | LLM reasoning for fusion, classification, planning, notifications |
+| Gemini 2.0 Flash | LLM reasoning for fusion, classification, planning, notifications (`LLM_MODE` controls mock / auto fallback — see below) |
 | `agents/traces/trace_log.jsonl` | workplan, task_plan, tool_call, agent_observation, final_outcome |
 
 ### Pipeline
@@ -86,6 +86,7 @@ POST /verify/{id}  → Verification Agent → alert retraction
 {
   "status": "completed",
   "signal_id": "uuid",
+  "simulated_llm_pipeline": false,
   "degraded_mode": false,
   "warnings": [],
   "fallback_sources_used": [],
@@ -119,8 +120,9 @@ cp .env.example .env          # set GOOGLE_API_KEY
 | API health | http://localhost:8000/health (or **8001** if 8000 is busy — see below) |
 | API docs | http://localhost:8000/docs |
 | Expo Metro | http://localhost:8081 |
+| Web preview (browser) | http://localhost:8081 — Map tab uses **Google Maps JavaScript API** when `EXPO_PUBLIC_GOOGLE_MAPS_KEY` is set (or `app.json` Android Maps key as fallback). Restrict the key by HTTP referrer. Full `react-native-maps` remains on native / Expo Go only. |
 
-**Live reload:** Source is bind-mounted. Edit `backend/`, `agents/`, or `mobile-app/` — no image rebuild. Rebuild only when dependencies change:
+**Web bundling:** `react-native-maps` is not web-compatible. The Map route re-exports from `src/screens/Map.web.tsx` / `Map.native.tsx` so Metro does not pull maps into the web bundle. Source is bind-mounted. Edit `backend/`, `agents/`, or `mobile-app/` — no image rebuild. Rebuild only when dependencies change:
 
 ```bash
 make rebuild                  # after requirements.docker.txt or package.json changes
@@ -151,11 +153,25 @@ BACKEND_HOST_PORT=8001
 EXPO_PUBLIC_API_URL=http://localhost:8001
 ```
 
-**Notes:**
+### Docker runtime notes
 
 - Docker uses `requirements.docker.txt` (no `google-adk` — pip conflict). LLM pipeline uses `google-generativeai`.
 - Incident data is in-memory; restarting the backend container clears incidents.
 - If a previous start failed, run `make down` before `make up` to clear stale containers.
+
+### LLM modes (`agents/llm_utils.py`)
+
+| `LLM_MODE` | Behavior |
+|------------|----------|
+| `mock` | Never calls Gemini; deterministic JSON from `agents/mock_llm_payloads.py`. |
+| `auto` | **Default** (see `.env.example`). Calls Gemini; on quota / 429 / invalid key / permission errors, falls back to the same mocks and sets `simulated_llm_pipeline` on the incident. |
+| `real` | Fail on LLM errors (production-style). |
+
+Optional: `GEMINI_MODEL_ID` overrides the GenerativeModel name (default `gemini-2.0-flash` in `agents/config.py`). All HTTP endpoints behave the same; traces include `llm_call_mock_mode` or `llm_call_fallback_mock` when mocks run.
+
+### Web map API key
+
+For the browser Map tab, enable **Maps JavaScript API** on the same or a dedicated Google Cloud key. In Cloud Console → Credentials → key restrictions → **HTTP referrers**, add `http://localhost:8081/*` and your LAN Expo URL (e.g. `http://192.168.1.10:8081/*`). Set `EXPO_PUBLIC_GOOGLE_MAPS_KEY` in `.env` and restart Expo so the value is inlined at bundle time. The app loads the official Maps JS script directly (no extra React map package required for Expo web).
 
 ### Local (without Docker)
 
@@ -205,7 +221,7 @@ Run: `python scripts/baseline_comparison.py`
 ## Limitations
 
 - In-memory store (not persistent across restarts).
-- LLM outputs require `GOOGLE_API_KEY` for live runs; tests use mocks.
+- LLM outputs use `GOOGLE_API_KEY` when `LLM_MODE` is `auto` or `real`; `LLM_MODE=mock` or exhausted quota with `auto` completes the pipeline with deterministic data (see table above).
 - google-adk 0.1.0 wrapper delegates to sequential pipeline until full ADK graph migration.
 
 ## Demo Video

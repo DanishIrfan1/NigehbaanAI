@@ -41,6 +41,7 @@ from agents.executor.action_agent import run_action_executor
 from agents.executor.notifier_agent import run_stakeholder_notifier
 from agents.verifier.verification_agent import run_verification_agent
 from agents.tools.alert_tool import retract_alert
+from agents.llm_utils import consume_signal_used_mock_llm
 
 WORKPLAN = (
     "Ingest signals → Fuse → Classify → Predict severity → "
@@ -289,7 +290,14 @@ def _run_pipeline_impl(signal_id: str, payload: dict) -> None:
     log_workplan(signal_id, WORKPLAN)
     log_trace(signal_id, "orchestrator", "pipeline_start", {"payload": payload})
 
-    upsert_incident(signal_id, {"status": "processing", "payload": payload})
+    upsert_incident(
+        signal_id,
+        {
+            "status": "processing",
+            "signal_id": signal_id,
+            "payload": payload,
+        },
+    )
 
     location = payload.get("location", "G-10, Islamabad")
     description = payload.get("description", "")
@@ -307,6 +315,7 @@ def _run_pipeline_impl(signal_id: str, payload: dict) -> None:
 
         upsert_incident(signal_id, {
             "status": "analyzing",
+            "signal_id": signal_id,
             "payload": payload,
             "stage": "signal_ingestion_complete",
             "degraded_mode": degraded_mode,
@@ -332,6 +341,7 @@ def _run_pipeline_impl(signal_id: str, payload: dict) -> None:
 
         upsert_incident(signal_id, {
             "status": "planning",
+            "signal_id": signal_id,
             "payload": payload,
             "stage": "detection_complete",
             "degraded_mode": degraded_mode,
@@ -379,18 +389,30 @@ def _run_pipeline_impl(signal_id: str, payload: dict) -> None:
             "tool_calls": stats.get("tool_calls", 0),
         })
 
+        result["simulated_llm_pipeline"] = consume_signal_used_mock_llm(signal_id)
         upsert_incident(signal_id, result)
 
-    except (OSError, ValueError, KeyError, RuntimeError, TypeError) as exc:
+    except Exception as exc:
+        # Includes Gemini quota (ResourceExhausted), network errors, JSON parse failures, etc.
+        err_msg = str(exc)
+        if "quota" in err_msg.lower() or "resource exhausted" in err_msg.lower() or "429" in err_msg:
+            user_hint = (
+                "Gemini API quota exceeded or rate-limited. Wait and retry, enable billing, "
+                "or use a different GOOGLE_API_KEY. See https://ai.google.dev/gemini-api/docs/rate-limits"
+            )
+        else:
+            user_hint = err_msg
         error_detail = {
             "status": "error",
             "signal_id": signal_id,
-            "error": str(exc),
+            "error": user_hint,
+            "error_detail": err_msg,
             "traceback": traceback.format_exc(),
             "degraded_mode": degraded_mode,
-            "warnings": warnings,
+            "warnings": warnings + [user_hint] if user_hint not in (warnings or []) else warnings,
         }
-        log_trace(signal_id, "orchestrator", "pipeline_error", {"error": str(exc)})
+        log_trace(signal_id, "orchestrator", "pipeline_error", {"error": err_msg})
+        error_detail["simulated_llm_pipeline"] = consume_signal_used_mock_llm(signal_id)
         upsert_incident(signal_id, error_detail)
 
 
@@ -454,7 +476,7 @@ def verify_incident(signal_id: str, field_report: str) -> None:
         })
         upsert_incident(signal_id, record)
 
-    except (OSError, ValueError, KeyError, RuntimeError, TypeError) as exc:
+    except Exception as exc:
         log_trace(signal_id, "orchestrator", "verification_error", {
             "error": str(exc),
             "traceback": traceback.format_exc(),

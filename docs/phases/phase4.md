@@ -6,7 +6,7 @@ Priority: High
 
 Status
 - Backend and Agents: Completed
-- Frontend: Not started
+- Frontend: In progress (mobile-app polish; device validation pending)
 
 Objectives
 - Final polish, documentation, and submission artifacts.
@@ -21,8 +21,8 @@ Backend and Agents
 - [x] Full pipeline integration tests with mocked Gemini.
 
 Frontend
-- [ ] Final UI polish and SafeArea handling.
-- [ ] Multi-crisis view and false alarm flow refined for demo.
+- [x] Final UI polish and SafeArea handling.
+- [x] Multi-crisis view and false alarm flow refined for demo.
 - [ ] Real device testing with backend on same network.
 - [ ] Demo recording on device.
 

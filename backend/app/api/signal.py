@@ -5,6 +5,8 @@ POST /signal  – Accept incoming crisis signals and dispatch to the ADK Orchest
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 
+from app.database.mock_store import upsert_incident
+
 router = APIRouter()
 
 
@@ -43,11 +45,22 @@ async def ingest_signal(payload: SignalPayload, background_tasks: BackgroundTask
     import uuid
 
     signal_id = str(uuid.uuid4())
+    payload_dict = payload.model_dump()
+
+    # Register immediately so GET /status/{id} never races the background worker.
+    upsert_incident(
+        signal_id,
+        {
+            "status": "queued",
+            "signal_id": signal_id,
+            "payload": payload_dict,
+        },
+    )
 
     # Use the new ADK orchestrator
     from agents.adk_orchestrator import process_signal
 
-    background_tasks.add_task(process_signal, signal_id, payload.model_dump())
+    background_tasks.add_task(process_signal, signal_id, payload_dict)
 
     return SignalResponse(
         signal_id=signal_id,
@@ -107,6 +120,15 @@ async def run_multi_crisis_scenario(background_tasks: BackgroundTasks):
         "enable_social": True,
         "enable_emergency_call": False,
     }
+
+    upsert_incident(
+        flood_id,
+        {"status": "queued", "signal_id": flood_id, "payload": flood_payload},
+    )
+    upsert_incident(
+        heat_id,
+        {"status": "queued", "signal_id": heat_id, "payload": heat_payload},
+    )
 
     background_tasks.add_task(process_signal, flood_id, flood_payload)
 
