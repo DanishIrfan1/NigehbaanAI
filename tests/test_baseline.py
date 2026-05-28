@@ -4,7 +4,6 @@ Baseline comparison: legacy stub orchestrator vs ADK pipeline.
 
 from __future__ import annotations
 
-import json
 import pathlib
 import sys
 
@@ -12,8 +11,8 @@ import pytest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-from agents.orchestrator import process_signal as stub_process
-from agents.adk_orchestrator import process_signal as adk_process
+from scripts.legacy.orchestrator_stub import process_signal as stub_process
+from agents.orchestrator import process_signal as graph_process
 import sys
 from pathlib import Path
 _backend = Path(__file__).resolve().parents[1] / "backend"
@@ -28,13 +27,14 @@ def test_baseline_stub_vs_adk():
     payload = {
         "location": "G-10, Islamabad",
         "description": "Streets flooded with water everywhere",
+        "disable_duplicate_detection": True,
     }
 
     stub_id = "baseline-stub"
     adk_id = "baseline-adk"
 
     stub_process(stub_id, payload)
-    adk_process(adk_id, payload)
+    graph_process(adk_id, payload)
 
     stub = incident_store[stub_id]
     adk = incident_store[adk_id]

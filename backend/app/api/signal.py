@@ -1,9 +1,11 @@
 """
-POST /signal  – Accept incoming crisis signals and dispatch to the ADK Orchestrator.
+POST /signal  – Accept incoming crisis signals and dispatch to the LangGraph orchestrator.
 """
 
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
+
+from app.database.mock_store import upsert_incident
 
 router = APIRouter()
 
@@ -37,22 +39,33 @@ class VerifyPayload(BaseModel):
 @router.post("/signal", response_model=SignalResponse, status_code=202)
 async def ingest_signal(payload: SignalPayload, background_tasks: BackgroundTasks):
     """
-    Accepts a crisis signal and queues it for ADK Orchestrator processing.
+    Accepts a crisis signal and queues it for LangGraph pipeline processing.
     Returns immediately with a signal_id; use GET /status/{signal_id} to poll.
     """
     import uuid
 
     signal_id = str(uuid.uuid4())
+    payload_dict = payload.model_dump()
 
-    # Use the new ADK orchestrator
-    from agents.adk_orchestrator import process_signal
+    # Register immediately so GET /status/{id} never races the background worker.
+    upsert_incident(
+        signal_id,
+        {
+            "status": "queued",
+            "signal_id": signal_id,
+            "payload": payload_dict,
+        },
+    )
 
-    background_tasks.add_task(process_signal, signal_id, payload.model_dump())
+    # LangGraph orchestrator
+    from agents.orchestrator import process_signal
+
+    background_tasks.add_task(process_signal, signal_id, payload_dict)
 
     return SignalResponse(
         signal_id=signal_id,
         status="queued",
-        message="Signal received. ADK Orchestrator processing in background.",
+        message="Signal received. LangGraph pipeline processing in background.",
     )
 
 
@@ -62,7 +75,7 @@ async def verify_signal(signal_id: str, payload: VerifyPayload, background_tasks
     Submit a field report to verify or correct an existing incident.
     Triggers the Verification Agent pipeline in the background.
     """
-    from agents.adk_orchestrator import verify_incident
+    from agents.orchestrator import verify_incident
 
     background_tasks.add_task(verify_incident, signal_id, payload.field_report)
 
@@ -82,7 +95,7 @@ async def run_multi_crisis_scenario(background_tasks: BackgroundTasks):
     import uuid
     import time
 
-    from agents.adk_orchestrator import process_signal
+    from agents.orchestrator import process_signal
 
     flood_id = str(uuid.uuid4())
     heat_id = str(uuid.uuid4())
@@ -107,6 +120,15 @@ async def run_multi_crisis_scenario(background_tasks: BackgroundTasks):
         "enable_social": True,
         "enable_emergency_call": False,
     }
+
+    upsert_incident(
+        flood_id,
+        {"status": "queued", "signal_id": flood_id, "payload": flood_payload},
+    )
+    upsert_incident(
+        heat_id,
+        {"status": "queued", "signal_id": heat_id, "payload": heat_payload},
+    )
 
     background_tasks.add_task(process_signal, flood_id, flood_payload)
 

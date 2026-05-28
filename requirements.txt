@@ -6,9 +6,11 @@ pydantic-settings>=2.5.2
 python-dotenv==1.0.1
 httpx>=0.28.1
 
-# ── Google Antigravity / ADK ──────────────────────────────────────────────────
-google-adk==0.1.0           # Antigravity Agent Development Kit (Hackathon SDK)
-google-generativeai==0.5.4  # Gemini models used by agents
+# ── LangGraph / Gemini ────────────────────────────────────────────────────────
+langgraph>=0.2.60
+langchain-core>=0.3.0
+langchain-google-genai>=2.0.0
+google-generativeai>=0.8.0
 
 # ── Agents / Tools ───────────────────────────────────────────────────────────
 aiohttp==3.9.5

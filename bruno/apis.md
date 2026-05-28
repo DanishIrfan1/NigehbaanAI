@@ -12,7 +12,7 @@ This document provides a comprehensive technical specification for the Nigehbaan
 ## 📡 Signal Ingestion
 
 ### 1. Submit Crisis Signal
-Triggers the multi-agent ADK Orchestrator pipeline (Detector → Planner → Executor).
+Triggers the LangGraph crisis pipeline (ingest → detect → plan → execute → notify).
 
 - **Endpoint:** `POST /api/v1/signal`
 - **Status Code:** `202 Accepted`
@@ -34,7 +34,7 @@ Triggers the multi-agent ADK Orchestrator pipeline (Detector → Planner → Exe
   {
     "signal_id": "uuid-v4-string",
     "status": "queued",
-    "message": "Signal received. ADK Orchestrator processing in background."
+    "message": "Signal received. LangGraph pipeline processing in background."
   }
   ```
 

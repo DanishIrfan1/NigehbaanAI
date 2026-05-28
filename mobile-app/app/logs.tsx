@@ -1,29 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withTiming, Easing } from 'react-native-reanimated';
-
-type AgentType = 'Detector' | 'Analyzer' | 'Planner' | 'Executor' | 'Verifier';
-
-interface LogEntry {
-  id: string;
-  timestamp: string;
-  agent: AgentType;
-  message: string;
-}
-
-const ALL_LOGS: LogEntry[] = [
-  { id: '1', timestamp: '14:02:10', agent: 'Detector', message: 'Ingesting 45 signals from Twitter and PMD.' },
-  { id: '2', timestamp: '14:02:11', agent: 'Detector', message: 'High confidence flooding detected in Sector G-10.' },
-  { id: '3', timestamp: '14:02:13', agent: 'Analyzer', message: 'Analyzing impact: Multiple vehicles stranded.' },
-  { id: '4', timestamp: '14:02:14', agent: 'Analyzer', message: 'Traffic blocked on Main Double Road.' },
-  { id: '5', timestamp: '14:02:16', agent: 'Planner', message: 'Generating evacuation routes avoiding Main Double Road.' },
-  { id: '6', timestamp: '14:02:17', agent: 'Planner', message: 'Drafting public safety alerts for G-10 residents.' },
-  { id: '7', timestamp: '14:02:19', agent: 'Executor', message: 'Dispatching emergency response units to Sector G-10.' },
-  { id: '8', timestamp: '14:02:20', agent: 'Executor', message: 'Alerts successfully broadcasted to nearby users.' },
-  { id: '9', timestamp: '14:02:22', agent: 'Verifier', message: 'Cross-checking executed actions against plan objectives.' },
-  { id: '10', timestamp: '14:02:24', agent: 'Verifier', message: 'All actions verified. Crisis response confirmed effective.' },
-];
+import { ActivityIndicator, Button } from 'react-native-paper';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
+import { useSignal } from '../src/context/SignalContext';
+import type { UILogEntry } from '../src/api/types';
 
 const LiveIndicator = () => {
   const opacity = useSharedValue(1);
@@ -34,7 +24,7 @@ const LiveIndicator = () => {
       -1,
       true
     );
-  }, []);
+  }, [opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
@@ -46,63 +36,83 @@ const LiveIndicator = () => {
   );
 };
 
-const AgentLogItem = ({ item }: { item: LogEntry }) => {
-  const getAgentColor = (agent: AgentType) => {
-    switch (agent) {
-      case 'Detector': return '#64b5f6'; // Light Blue
-      case 'Analyzer': return '#ffeb3b'; // Yellow
-      case 'Planner': return '#ffb74d'; // Orange
-      case 'Executor': return '#81c784'; // Green
-      case 'Verifier': return '#ff5252'; // Red
-      default: return '#ffffff';
-    }
-  };
-
-  return (
-    <Animated.View entering={FadeInDown.duration(400)} style={styles.logItemContainer}>
-      <Text style={styles.logTimestamp}>[{item.timestamp}]</Text>
-      <Text style={[styles.logAgent, { color: getAgentColor(item.agent) }]}>
-        {item.agent}:
-      </Text>
-      <Text style={styles.logMessage}>{item.message}</Text>
-    </Animated.View>
-  );
-};
+const AgentLogItem = ({ item }: { item: UILogEntry }) => (
+  <Animated.View entering={FadeInDown.duration(400)} style={styles.logItemContainer}>
+    <Text style={styles.logTimestamp}>[{item.timestamp}]</Text>
+    <Text style={[styles.logAgent, { color: '#64b5f6' }]}>{item.agent}:</Text>
+    <Text style={styles.logMessage}>{item.message}</Text>
+  </Animated.View>
+);
 
 export default function LogsScreen() {
   const router = useRouter();
-  const [visibleLogs, setVisibleLogs] = useState<LogEntry[]>([]);
-  const [isDone, setIsDone] = useState(false);
+  const { traces, isPolling, signalId, refresh } = useSignal();
+  const [visibleLogs, setVisibleLogs] = useState<UILogEntry[]>([]);
   const flatListRef = useRef<FlatList>(null);
+  const streamIndexRef = useRef(0);
 
   useEffect(() => {
-    let currentIndex = 0;
-    
-    // Show first log immediately
-    if (ALL_LOGS.length > 0) {
-      setVisibleLogs([ALL_LOGS[0]]);
-      currentIndex++;
+    streamIndexRef.current = 0;
+    setVisibleLogs([]);
+  }, [signalId]);
+
+  useEffect(() => {
+    if (traces.length === 0) return;
+
+    if (!isPolling) {
+      setVisibleLogs(traces);
+      return;
     }
 
     const intervalId = setInterval(() => {
-      if (currentIndex < ALL_LOGS.length) {
-        setVisibleLogs((prev) => [...prev, ALL_LOGS[currentIndex]]);
-        currentIndex++;
-      } else {
-        clearInterval(intervalId);
-        setIsDone(true);
+      const idx = streamIndexRef.current;
+      if (idx < traces.length) {
+        setVisibleLogs((prev) => {
+          const next = traces[idx];
+          if (prev.some((p) => p.id === next.id)) return prev;
+          return [...prev, next];
+        });
+        streamIndexRef.current = idx + 1;
       }
-    }, 1500);
+    }, 800);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [traces, isPolling]);
+
+  useEffect(() => {
+    if (!isPolling && traces.length > 0) {
+      setVisibleLogs(traces);
+    }
+  }, [isPolling, traces]);
+
+  const isDone = !isPolling && visibleLogs.length > 0;
+
+  if (!signalId) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>No active signal. Run analysis from Dashboard.</Text>
+          <Button mode="contained" onPress={() => router.push('/')}>
+            Dashboard
+          </Button>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>System Trace</Text>
-        {!isDone && <LiveIndicator />}
+        {isPolling ? <LiveIndicator /> : null}
+        <Button mode="text" compact onPress={() => refresh()}>
+          Refresh
+        </Button>
       </View>
+
+      {visibleLogs.length === 0 && isPolling ? (
+        <ActivityIndicator animating style={{ marginTop: 32 }} />
+      ) : null}
 
       <FlatList
         ref={flatListRef}
@@ -111,15 +121,14 @@ export default function LogsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Waiting for agent traces...</Text>
+        }
       />
 
       {isDone && (
         <Animated.View entering={FadeIn.duration(800)} style={styles.footer}>
-          <TouchableOpacity 
-            style={styles.proceedButton} 
-            onPress={() => router.push('/map')}
-          >
+          <TouchableOpacity style={styles.proceedButton} onPress={() => router.push('/map')}>
             <Text style={styles.proceedButtonText}>Proceed to Map</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -129,10 +138,7 @@ export default function LogsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#0A0E1A', // Dark terminal-style background
-  },
+  container: { flex: 1, backgroundColor: '#0A0E1A' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -141,74 +147,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#1E293B',
   },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'monospace',
-  },
-  liveContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ff4444',
-    marginRight: 6,
-  },
-  liveText: {
-    color: '#ff4444',
-    fontSize: 12,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  listContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  logItemContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    flexWrap: 'wrap',
-  },
-  logTimestamp: {
-    color: '#8892B0',
-    fontFamily: 'monospace',
-    marginRight: 8,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  logAgent: {
-    fontWeight: 'bold',
-    fontFamily: 'monospace',
-    marginRight: 8,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  logMessage: {
-    color: '#CCD6F6',
-    fontFamily: 'monospace',
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  footer: {
-    padding: 16,
-    paddingBottom: 32,
-    borderTopWidth: 1,
-    borderTopColor: '#1E293B',
-  },
+  headerTitle: { color: '#ffffff', fontSize: 18, fontWeight: 'bold', fontFamily: 'monospace', flex: 1 },
+  liveContainer: { flexDirection: 'row', alignItems: 'center' },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#ff4444', marginRight: 6 },
+  liveText: { color: '#ff4444', fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
+  listContent: { padding: 16, paddingBottom: 40 },
+  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  emptyText: { color: '#8892B0', textAlign: 'center', margin: 24, fontFamily: 'monospace' },
+  logItemContainer: { flexDirection: 'row', marginBottom: 12, flexWrap: 'wrap' },
+  logTimestamp: { color: '#8892B0', fontFamily: 'monospace', marginRight: 8, fontSize: 14, lineHeight: 20 },
+  logAgent: { fontWeight: 'bold', fontFamily: 'monospace', marginRight: 8, fontSize: 14, lineHeight: 20 },
+  logMessage: { color: '#CCD6F6', fontFamily: 'monospace', flex: 1, fontSize: 14, lineHeight: 20 },
+  footer: { padding: 16, paddingBottom: 32, borderTopWidth: 1, borderTopColor: '#1E293B' },
   proceedButton: {
-    backgroundColor: '#f44336', // Primary Red
+    backgroundColor: '#f44336',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
   },
-  proceedButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  proceedButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
 });

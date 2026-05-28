@@ -18,7 +18,11 @@ load_dotenv(pathlib.Path(__file__).resolve().parents[1] / ".env")
 
 
 @pytest.mark.skipif(
-    os.getenv("GOOGLE_API_KEY", "").startswith("your"),
+    os.getenv("RUN_GEMINI_LIVE", "0") != "1",
+    reason="Set RUN_GEMINI_LIVE=1 to run live Gemini connectivity test",
+)
+@pytest.mark.skipif(
+    not os.getenv("GOOGLE_API_KEY", "").strip() or os.getenv("GOOGLE_API_KEY", "").startswith("your"),
     reason="GOOGLE_API_KEY not configured — set it in .env to run this test",
 )
 def test_gemini_hello_world():

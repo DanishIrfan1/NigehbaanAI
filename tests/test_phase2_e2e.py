@@ -4,11 +4,10 @@ Phase 2 E2E: full pipeline with mocked LLM agents.
 
 from __future__ import annotations
 
-import time
 
 import pytest
 
-from agents.adk_orchestrator import process_signal
+from agents.orchestrator import process_signal
 import sys
 from pathlib import Path
 _backend = Path(__file__).resolve().parents[1] / "backend"
