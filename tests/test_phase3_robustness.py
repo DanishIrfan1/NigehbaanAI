@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from agents.adk_orchestrator import process_signal, verify_incident
+from agents.orchestrator import process_signal, verify_incident
 from agents.robustness.degraded import assess_ingestion, detect_duplicate
 import sys
 from pathlib import Path

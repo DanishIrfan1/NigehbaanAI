@@ -22,7 +22,7 @@ Backend and Agents
 - [x] API endpoints for signal ingest and detection results.
 - [x] E2E test coverage for Phase 1 flow.
 - [x] Wire `enable_weather` / `enable_traffic` / `enable_social` / `enable_emergency_call` in `_ingest_signals`.
-- [x] Deprecate legacy orchestrator.py; production path is adk_orchestrator.py only.
+- [x] Production path is LangGraph via agents/orchestrator.py; legacy stub in scripts/legacy/.
 - [x] Align docs/README.md architecture diagram with ADK orchestrator.
 
 Frontend (Mock UI Flow)

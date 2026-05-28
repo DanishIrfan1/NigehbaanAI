@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import pathlib
 import sys
 
@@ -17,12 +16,7 @@ load_dotenv(_REPO_ROOT / ".env")
 
 
 from agents.mock_llm_payloads import (
-    MOCK_CLASSIFICATION,
-    MOCK_FUSION,
-    MOCK_NOTIFICATIONS,
     MOCK_PLAN,
-    MOCK_SEVERITY,
-    MOCK_VERIFICATION,
 )
 
 @pytest.fixture(autouse=True)
@@ -43,21 +37,18 @@ def reset_stores():
 
 def _mock_plan(sid, c, s, active=None):
     """Return plan with resources enforced without LLM."""
-    from agents.planner.resource_agent import enforce_resource_caps
+    from agents.graph.services.resources import enforce_resource_caps
     plan = dict(MOCK_PLAN)
     return enforce_resource_caps(plan)
 
 
+@pytest.fixture(autouse=True)
+def llm_mock_mode(monkeypatch):
+    """Use deterministic mocks for all LangGraph LLM nodes in tests."""
+    monkeypatch.setenv("LLM_MODE", "mock")
+
+
 @pytest.fixture
-def mock_llm_agents(monkeypatch):
-    """Patch LLM agents at orchestrator import sites."""
-    targets = {
-        "agents.adk_orchestrator.run_signal_fusion": lambda sid, signals: MOCK_FUSION,
-        "agents.adk_orchestrator.run_classifier": lambda sid, fusion, signals: MOCK_CLASSIFICATION,
-        "agents.adk_orchestrator.run_severity_predictor": lambda sid, classification, signals: MOCK_SEVERITY,
-        "agents.adk_orchestrator.run_resource_planner": _mock_plan,
-        "agents.adk_orchestrator.run_stakeholder_notifier": lambda sid, c, s, e: dict(MOCK_NOTIFICATIONS),
-        "agents.adk_orchestrator.run_verification_agent": lambda sid, det, report: dict(MOCK_VERIFICATION),
-    }
-    for target, fn in targets.items():
-        monkeypatch.setattr(target, fn)
+def mock_llm_agents():
+    """Kept for backward compatibility; autouse llm_mock_mode enables LLM mocks."""
+    yield

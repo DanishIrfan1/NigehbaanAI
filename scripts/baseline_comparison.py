@@ -18,13 +18,14 @@ load_dotenv(_REPO / ".env")
 
 sys.path.insert(0, str(_REPO / "backend"))
 from app.database.mock_store import incident_store, reset_resource_ledger
-from agents.orchestrator import process_signal as stub_process
-from agents.adk_orchestrator import process_signal as adk_process
+from scripts.legacy.orchestrator_stub import process_signal as stub_process
+from agents.orchestrator import process_signal as graph_process
 
 
 PAYLOAD = {
     "location": "G-10, Islamabad",
     "description": "Streets flooded with water entering homes",
+    "disable_duplicate_detection": True,
 }
 
 
@@ -54,11 +55,11 @@ def main():
     print("Running legacy stub orchestrator...")
     stub_process(stub_id, PAYLOAD)
 
-    print("Running ADK orchestrator (requires GOOGLE_API_KEY or will error)...")
+    print("Running LangGraph orchestrator...")
     try:
-        adk_process(adk_id, PAYLOAD)
+        graph_process(adk_id, PAYLOAD)
     except Exception as e:
-        print(f"ADK run failed (expected without API key): {e}")
+        print(f"LangGraph run failed: {e}")
         adk_record = {"status": "error", "error": str(e)}
     else:
         adk_record = incident_store.get(adk_id, {})

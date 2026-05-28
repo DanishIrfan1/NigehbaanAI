@@ -11,10 +11,15 @@ from typing import Any
 
 MOCK_FUSION: dict[str, Any] = {
     "fused_summary": "Heavy rain and flooding reports in G-10 with traffic congestion.",
-    "overall_urgency": "high",
-    "credibility_scores": {"weather": 0.95, "traffic": 0.9, "social": 0.6},
-    "contradictions": [{"sources": ["social"], "detail": "water main vs flood"}],
-    "recommended_action": "Deploy rescue teams",
+    "weighted_urgency": "high",
+    "overall_confidence": 0.88,
+    "source_credibility_scores": {"weather": 0.95, "traffic": 0.9, "social_media": 0.6, "emergency_call": 0.85},
+    "contradiction_detected": True,
+    "contradicting_signals": ["social"],
+    "contradiction_description": "water main vs flood",
+    "primary_signal_source": "weather",
+    "contributing_signals": ["weather", "traffic"],
+    "dissenting_signals": ["social"],
 }
 
 MOCK_CLASSIFICATION: dict[str, Any] = {
@@ -22,14 +27,14 @@ MOCK_CLASSIFICATION: dict[str, Any] = {
     "location": "G-10, Islamabad",
     "confidence": 0.92,
     "alternative_hypothesis": "infrastructure_failure",
-    "geolocation_confidence": 0.88,
+    "geolocation_confidence": "high",
     "requires_field_verification": False,
 }
 
 MOCK_SEVERITY: dict[str, Any] = {
     "severity": "high",
     "affected_radius_km": 2.5,
-    "affected_population": 15000,
+    "affected_population_estimate": 15000,
     "expected_duration_hrs": 6,
     "peak_impact_time": "2026-05-18T14:00:00Z",
     "spread_risk": "medium",
@@ -100,25 +105,41 @@ MOCK_VERIFICATION: dict[str, Any] = {
     "confidence_after_verification": 0.91,
 }
 
+MOCK_DETECTION: dict[str, Any] = {
+    "fusion": MOCK_FUSION,
+    "classification": MOCK_CLASSIFICATION,
+    "severity": MOCK_SEVERITY,
+}
+
+MOCK_NOTIFY_LLM: dict[str, Any] = {
+    "public": MOCK_NOTIFICATIONS["notifications"]["public"],
+    "emergency_services": MOCK_NOTIFICATIONS["notifications"]["emergency_services"],
+}
+
 _AGENT_TO_PAYLOAD: dict[str, dict[str, Any]] = {
     "signal_fusion_agent": MOCK_FUSION,
     "crisis_classifier_agent": MOCK_CLASSIFICATION,
     "severity_predictor_agent": MOCK_SEVERITY,
+    "detect_agent": MOCK_DETECTION,
     "resource_planner_agent": MOCK_PLAN,
     "stakeholder_notifier_agent": MOCK_NOTIFICATIONS,
+    "notify_llm_agent": MOCK_NOTIFY_LLM,
     "verification_agent": MOCK_VERIFICATION,
 }
 
 
-def mock_llm_json_for_agent(agent_name: str) -> str:
-    """Return JSON string matching the given agent's expected LLM output shape."""
+def mock_payload_for_agent(agent_name: str) -> dict[str, Any]:
+    """Return dict payload for structured LLM mock / fallback."""
     payload = _AGENT_TO_PAYLOAD.get(agent_name)
     if payload is None:
-        return json.dumps(
-            {
-                "error": "unknown_agent",
-                "agent_name": agent_name,
-                "detail": "No mock payload registered for this agent.",
-            }
-        )
-    return json.dumps(payload)
+        return {
+            "error": "unknown_agent",
+            "agent_name": agent_name,
+            "detail": "No mock payload registered for this agent.",
+        }
+    return payload
+
+
+def mock_llm_json_for_agent(agent_name: str) -> str:
+    """Return JSON string matching the given agent's expected LLM output shape."""
+    return json.dumps(mock_payload_for_agent(agent_name))

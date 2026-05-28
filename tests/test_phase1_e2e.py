@@ -3,14 +3,13 @@ Test: End-to-end Phase 1 verification.
 
 Verifies:
   - All signal ingestion tools return valid data (Task 1.2)
-  - Detector agent modules are importable (Task 1.3)
-  - ADK Orchestrator is importable and wired correctly (Task 1.4)
+  - LangGraph detection schema validates (Task 1.3)
+  - LangGraph orchestrator is importable and wired correctly (Task 1.4)
   - FastAPI endpoints respond correctly (Task 1.5)
 
 Run: pytest tests/test_phase1_e2e.py -v
 """
 
-import os
 import sys
 import pathlib
 
@@ -77,63 +76,38 @@ class TestSignalTools:
         print("✅ Emergency call tool: no-data handled gracefully")
 
 
-# ── Task 1.3: Detector Agent Modules ─────────────────────────────────────────
+# ── Task 1.3: LangGraph detection ─────────────────────────────────────────────
 
-class TestDetectorModules:
-    """Verify the 3 detector agents are importable with correct signatures."""
+class TestLangGraphDetection:
+    """Verify merged detection schema and graph compile."""
 
-    def test_signal_fusion_agent_importable(self):
-        from agents.detector.signal_fusion_agent import run_signal_fusion
-        import inspect
+    def test_detection_schema_mock_payload(self):
+        from agents.graph.schemas import DetectionResult
+        from agents.mock_llm_payloads import MOCK_DETECTION
 
-        sig = inspect.signature(run_signal_fusion)
-        params = list(sig.parameters.keys())
-        assert "signal_id" in params
-        assert "signals" in params
-        print("✅ signal_fusion_agent.run_signal_fusion is importable")
+        result = DetectionResult.model_validate(MOCK_DETECTION)
+        assert result.classification.crisis_type == "urban_flooding"
+        assert result.severity.severity == "high"
+        print("✅ DetectionResult validates mock payload")
 
-    def test_classifier_agent_importable(self):
-        from agents.detector.classifier_agent import run_classifier
-        import inspect
+    def test_main_graph_compiles(self):
+        from agents.graph.build import compile_main_graph
 
-        sig = inspect.signature(run_classifier)
-        params = list(sig.parameters.keys())
-        assert "signal_id" in params
-        assert "fusion_result" in params
-        assert "signals" in params
-        print("✅ classifier_agent.run_classifier is importable")
-
-    def test_severity_agent_importable(self):
-        from agents.detector.severity_agent import run_severity_predictor
-        import inspect
-
-        sig = inspect.signature(run_severity_predictor)
-        params = list(sig.parameters.keys())
-        assert "signal_id" in params
-        assert "classification" in params
-        assert "signals" in params
-        print("✅ severity_agent.run_severity_predictor is importable")
-
-    def test_detector_package_exports(self):
-        """Verify the detector package re-exports all agents."""
-        from agents.detector import run_signal_fusion, run_classifier, run_severity_predictor
-
-        assert callable(run_signal_fusion)
-        assert callable(run_classifier)
-        assert callable(run_severity_predictor)
-        print("✅ agents.detector package exports all 3 agents")
+        graph = compile_main_graph()
+        assert graph is not None
+        print("✅ LangGraph main pipeline compiles")
 
 
-# ── Task 1.4: ADK Orchestrator ───────────────────────────────────────────────
+# ── Task 1.4: LangGraph orchestrator ─────────────────────────────────────────
 
 class TestOrchestratorWiring:
-    """Verify the orchestrator is importable and wired to detector agents."""
+    """Verify the orchestrator is importable."""
 
     def test_orchestrator_importable(self):
-        from agents.adk_orchestrator import process_signal
+        from agents.orchestrator import process_signal
 
         assert callable(process_signal)
-        print("✅ adk_orchestrator.process_signal is importable")
+        print("✅ agents.orchestrator.process_signal is importable")
 
     def test_config_loaded(self):
         from agents.config import MODEL_ID, GOOGLE_API_KEY, log_trace, get_traces

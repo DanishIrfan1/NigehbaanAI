@@ -12,29 +12,26 @@ nigehbaan-ai/
 │       ├── api/            # signal.py, status.py
 │       ├── core/           # Settings (.env)
 │       └── database/       # mock_store.py (incidents + resource ledger)
-├── agents/                 # GOOGLE ANTIGRAVITY / ADK CORE
-│   ├── adk_orchestrator.py # Production pipeline (ingest → detect → respond)
-│   ├── adk_pipeline.py     # google-adk wrapper (USE_ADK=true)
-│   ├── orchestrator.py     # DEPRECATED stub (baseline comparison only)
-│   ├── detector/           # fusion, classifier, severity
-│   ├── planner/            # resource_agent
-│   ├── executor/           # action_agent, notifier_agent
-│   ├── verifier/           # verification_agent
-│   ├── robustness/         # degraded mode, fallbacks, duplicates
+├── .agents/skills/         # Cursor agent skills (canonical)
+├── agents/                 # LangGraph runtime (Python package)
+│   ├── orchestrator.py     # Production entry (graph.invoke)
+│   ├── graph/              # nodes, services, verification subgraph
 │   ├── tools/              # weather, traffic, social, emergency, map, alert
-│   └── traces/             # trace_log.jsonl (submission evidence)
+│   ├── robustness/         # degraded mode, fallbacks, duplicates
+│   └── traces/             # trace_log.jsonl
 ├── scripts/
+│   ├── legacy/orchestrator_stub.py  # baseline comparison only
 │   ├── run_demo_scenarios.py
 │   └── baseline_comparison.py
 └── tests/
 ```
 
-## Antigravity / ADK Role
+## LangGraph role
 
 | Component | Role |
 |-----------|------|
-| `adk_orchestrator.py` | Sequential multi-agent pipeline with JSONL traces |
-| `adk_pipeline.py` | google-adk SDK wrapper (`USE_ADK=true`) |
+| `orchestrator.py` | LangGraph pipeline with JSONL traces |
+| `agents/graph/` | Node graph (ingest → compress → detect → plan → execute → notify → impact) |
 | Gemini 2.0 Flash | LLM reasoning for fusion, classification, planning, notifications (`LLM_MODE` controls mock / auto fallback — see below) |
 | `agents/traces/trace_log.jsonl` | workplan, task_plan, tool_call, agent_observation, final_outcome |
 
@@ -155,11 +152,11 @@ EXPO_PUBLIC_API_URL=http://localhost:8001
 
 ### Docker runtime notes
 
-- Docker uses `requirements.docker.txt` (no `google-adk` — pip conflict). LLM pipeline uses `google-generativeai`.
+- Docker uses `requirements.docker.txt`. LLM pipeline uses Gemini via `langchain-google-genai` (and `google-generativeai`).
 - Incident data is in-memory; restarting the backend container clears incidents.
 - If a previous start failed, run `make down` before `make up` to clear stale containers.
 
-### LLM modes (`agents/llm_utils.py`)
+### LLM modes (`agents/llm.py`)
 
 | `LLM_MODE` | Behavior |
 |------------|----------|
@@ -222,7 +219,7 @@ Run: `python scripts/baseline_comparison.py`
 
 - In-memory store (not persistent across restarts).
 - LLM outputs use `GOOGLE_API_KEY` when `LLM_MODE` is `auto` or `real`; `LLM_MODE=mock` or exhausted quota with `auto` completes the pipeline with deterministic data (see table above).
-- google-adk 0.1.0 wrapper delegates to sequential pipeline until full ADK graph migration.
+- The pipeline is implemented with LangGraph; there is no ADK wrapper layer.
 
 ## Demo Video
 > Link: _TBD – add before submission_

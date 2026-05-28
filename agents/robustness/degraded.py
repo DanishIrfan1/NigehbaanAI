@@ -13,6 +13,62 @@ from agents.tools.weather_tool import fetch_weather
 from agents.tools.traffic_tool import fetch_traffic
 
 
+def _parse_timestamp(value: str | None) -> datetime.datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _is_expired(ts: datetime.datetime | None, now: datetime.datetime, window_minutes: int) -> bool:
+    if ts is None:
+        return True
+    return (now - ts).total_seconds() > window_minutes * 60
+
+
+def _is_candidate_status(record: dict[str, Any], now: datetime.datetime, window_minutes: int) -> bool:
+    status = record.get("status", "")
+    if status in ("error", "false_alarm"):
+        return False
+    if status != "completed":
+        return True
+    return not _is_expired(_parse_timestamp(record.get("completed_at")), now, window_minutes)
+
+
+def _location_matches(location: str, record: dict[str, Any]) -> bool:
+    loc_norm = location.lower().strip()
+    payload_loc = (record.get("payload") or {}).get("location", "").lower()
+    if not payload_loc:
+        return False
+    return loc_norm in payload_loc or payload_loc in loc_norm
+
+
+def _type_matches(crisis_type: str | None, record: dict[str, Any]) -> bool:
+    existing_type = (
+        record.get("detection", {})
+        .get("classification", {})
+        .get("crisis_type")
+    )
+    if not (crisis_type and existing_type):
+        return True
+    return crisis_type == existing_type
+
+
+def _duplicate_payload(sid: str, location: str, record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "duplicate_of": sid,
+        "location": location,
+        "existing_status": record.get("status", ""),
+        "existing_type": (
+            record.get("detection", {})
+            .get("classification", {})
+            .get("crisis_type")
+        ),
+    }
+
+
 def _skipped_source(source: str, reason: str) -> dict:
     return {
         "source": source,
@@ -108,38 +164,19 @@ def detect_duplicate(
 ) -> dict[str, Any] | None:
     """Return duplicate incident info if same location has a recent active incident."""
     now = datetime.datetime.now(datetime.timezone.utc)
-    loc_norm = location.lower().strip()
 
     for sid, record in incident_store.items():
         if sid == signal_id:
             continue
-        status = record.get("status", "")
-        if status in ("error", "false_alarm"):
+        if not _is_candidate_status(record, now, window_minutes):
             continue
-        payload_loc = (record.get("payload") or {}).get("location", "").lower()
-        if loc_norm not in payload_loc and payload_loc not in loc_norm:
+        if not _location_matches(location, record):
             continue
-        existing_type = (
-            record.get("detection", {})
-            .get("classification", {})
-            .get("crisis_type")
-        )
-        if crisis_type and existing_type and crisis_type != existing_type:
+        if not _type_matches(crisis_type, record):
             continue
-        completed_at = record.get("completed_at")
-        if completed_at:
-            try:
-                ts = datetime.datetime.fromisoformat(
-                    completed_at.replace("Z", "+00:00")
-                )
-                if (now - ts).total_seconds() > window_minutes * 60:
-                    continue
-            except ValueError:
+        if record.get("status") == "completed":
+            completed_ts = _parse_timestamp(record.get("completed_at"))
+            if _is_expired(completed_ts, now, window_minutes):
                 continue
-        return {
-            "duplicate_of": sid,
-            "location": location,
-            "existing_status": status,
-            "existing_type": existing_type,
-        }
+        return _duplicate_payload(sid, location, record)
     return None

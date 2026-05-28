@@ -17,7 +17,7 @@ Backend and Agents
 - [x] Trace log polish (workplan, task_plan, final_outcome entries).
 - [x] Baseline comparison script: scripts/baseline_comparison.py.
 - [x] Latency and cost notes for the pipeline.
-- [x] Google ADK integration wrapper (agents/adk_pipeline.py).
+- [x] LangGraph pipeline refactor (agents/graph/, agents/orchestrator.py).
 - [x] Full pipeline integration tests with mocked Gemini.
 
 Frontend

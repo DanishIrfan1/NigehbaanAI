@@ -22,7 +22,7 @@ load_dotenv(_REPO / ".env")
 
 sys.path.insert(0, str(_REPO / "backend"))
 from app.database.mock_store import incident_store, reset_resource_ledger
-from agents.adk_orchestrator import process_signal, verify_incident
+from agents.orchestrator import process_signal, verify_incident
 
 
 def _wait(signal_id: str, timeout: int = 120) -> dict:
@@ -46,7 +46,7 @@ def scenario_1_flood() -> str:
         "enable_emergency_call": True,
     })
     rec = _wait(sid)
-    print(f"\n=== Scenario 1: G-10 Flood ===")
+    print("\n=== Scenario 1: G-10 Flood ===")
     print(f"signal_id: {sid}")
     print(f"status: {rec.get('status')}")
     print(f"crisis: {rec.get('detection', {}).get('classification', {}).get('crisis_type')}")
@@ -78,7 +78,7 @@ def scenario_2_multi_crisis() -> tuple[str, str]:
 
     flood_rec = _wait(flood_id)
     heat_rec = _wait(heat_id)
-    print(f"\n=== Scenario 2: Multi-Crisis ===")
+    print("\n=== Scenario 2: Multi-Crisis ===")
     print(f"flood_signal_id: {flood_id} -> {flood_rec.get('status')}")
     print(f"heat_signal_id: {heat_id} -> {heat_rec.get('status')}")
     tradeoffs = heat_rec.get("response", {}).get("plan", {}).get("multi_crisis_tradeoffs", "")
@@ -97,7 +97,7 @@ def scenario_3_false_alarm(flood_id: str | None = None) -> str:
 
     verify_incident(sid, "Field report: broken water main only, not flooding. Water levels normal.")
     rec = _wait(sid)
-    print(f"\n=== Scenario 3: False Alarm Correction ===")
+    print("\n=== Scenario 3: False Alarm Correction ===")
     print(f"signal_id: {sid}")
     print(f"status: {rec.get('status')}")
     print(f"verification: {rec.get('verification', {}).get('verification_status')}")
