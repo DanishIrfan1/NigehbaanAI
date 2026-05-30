@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Web Dashboard — React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Optional** browser dashboard for NigehbaanAI. Mirrors the mobile app flow: submit signals, view crisis status, agent logs, actions, and alerts.
 
-Currently, two official plugins are available:
+Not required for the hackathon deliverable (mobile app is mandatory) but useful for demos on a laptop without Expo Go.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Technology | Role |
+|------------|------|
+| Vite | Dev server and build |
+| React 19 | UI |
+| TypeScript | Types |
+| React Router | Client routing |
+| Zustand | App state (`src/store/useAppStore.ts`) |
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Project layout
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+web-app/
+├── src/
+│   ├── pages/
+│   │   ├── Dashboard.tsx    # Signal input + overview
+│   │   ├── CrisisMap.tsx    # Map view
+│   │   ├── Logs.tsx         # Agent traces
+│   │   ├── Actions.tsx      # Response actions
+│   │   ├── Alerts.tsx       # Notifications
+│   │   ├── Settings.tsx
+│   │   └── Profile.tsx
+│   ├── routes/AppRoutes.tsx
+│   ├── layouts/MainLayout.tsx
+│   ├── components/ui/       # Button, Card, Sidebar, …
+│   ├── store/useAppStore.ts
+│   ├── types/index.ts
+│   └── mockData/            # Fallback mock data for offline UI dev
+├── index.html
+└── vite.config.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Running
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Standalone (API must be running separately):**
+
+```bash
+cd web-app
+npm install
+npm run dev
 ```
+
+Default Vite port is usually **5173**. Point the app at the backend in Settings or via env if configured.
+
+**Note:** The primary Docker setup runs the **mobile-app** Expo server on port 8081, not this Vite app. For full-stack Docker demos, use the Expo web preview at http://localhost:8081, or run `web-app` manually against `http://localhost:8000`.
+
+---
+
+## API integration
+
+The dashboard calls the same REST API as the mobile app:
+
+| Action | Endpoint |
+|--------|----------|
+| Submit signal | `POST /api/v1/signal` |
+| Poll status | `GET /api/v1/status/{id}` |
+| Traces | `GET /api/v1/agents/trace/{id}` |
+| Actions | `GET /api/v1/actions/{id}` |
+| Outcome | `GET /api/v1/outcome/{id}` |
+
+See [API reference](../docs/api-reference.md).
+
+---
+
+## Routes
+
+| Path | Page |
+|------|------|
+| `/` | Dashboard |
+| `/map` | Crisis map |
+| `/logs` | Agent reasoning log |
+| `/actions` | Executed actions |
+| `/alerts` | Stakeholder notifications |
+| `/settings` | Configuration |
+| `/profile` | Profile placeholder |
+
+---
+
+## Build
+
+```bash
+npm run build    # output to dist/
+npm run preview  # preview production build
+```
+
+---
+
+## Docs
+
+- [Mobile app](../mobile-app/README.md) — primary client (Expo)
+- [Getting started](../docs/getting-started.md)
+- [Architecture](../docs/architecture.md)

@@ -3,7 +3,7 @@
 # Backend
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
-pydantic==2.7.1
+pydantic>=2.7.4,<3.0.0
 pydantic-settings==2.2.1
 python-dotenv==1.0.1
 httpx==0.27.0
@@ -11,8 +11,7 @@ httpx==0.27.0
 # LangGraph / Gemini (agents)
 langgraph>=0.2.60
 langchain-core>=0.3.0
-langchain-google-genai>=2.0.0
-google-generativeai>=0.8.0
+langchain-google-genai>=2.1.12,<3.0.0
 
 # Agents / tools
 aiohttp==3.9.5
