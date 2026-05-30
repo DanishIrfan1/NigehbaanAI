@@ -2,6 +2,8 @@
 
 Crisis Intelligence & Response Orchestrator (CIRO). Production pipeline: LangGraph in [`agents/orchestrator.py`](agents/orchestrator.py). API: [`backend/app/main.py`](backend/app/main.py).
 
+**Human documentation:** [docs/README.md](docs/README.md) · [Architecture](docs/architecture.md) · [Getting started](docs/getting-started.md)
+
 ## Agent Skills
 
 Read and follow the relevant skill when working in that area. Canonical skills live under [`.agents/skills/`](.agents/skills/) (pointers in [`.cursor/skills/`](.cursor/skills/)).

@@ -1,6 +1,9 @@
-# NigehbaanAI — Technical API Reference
+# NigehbaanAI — API Quick Reference
 
-This document provides a comprehensive technical specification for the NigehbaanAI (CIRO) Backend APIs.
+> **Full reference:** [docs/api-reference.md](../docs/api-reference.md)  
+> **Bruno collection:** import the [`bruno/`](.) folder into [Bruno](https://www.usebruno.com/).
+
+This document provides a concise API spec for the NigehbaanAI (CIRO) backend.
 
 ## 🚀 Global Configuration
 - **Base URL:** `http://localhost:8000`
